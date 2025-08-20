@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      select: false,
     },
 
     role: {
@@ -55,12 +56,18 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.index({ email: 1 }, { unique: true });
+
 // Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) {
+  if (!this.isModified("password")) return next();
+
+  try {
     this.password = await bcrypt.hash(this.password, 12);
+    next();
+  } catch (err) {
+    next(err);
   }
-  next();
 });
 
 userSchema.methods.comparePassword = async function (password) {

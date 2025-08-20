@@ -565,6 +565,7 @@ label {
 .checkbox-container {
     display: flex;
     cursor: pointer;
+    align-items: center;
 }
 
 .checkbox-container input[type="checkbox"] {
@@ -5797,6 +5798,28 @@ figcaption {
     width: 100%;
 }
 
+.primary-button-2 {
+    padding: 18px var(--components--buttons--paddings--pd-large) var(--components--buttons--paddings--pd-medium);
+    grid-column-gap: var(--components--buttons--gaps--gap-small);
+    grid-row-gap: var(--components--buttons--gaps--gap-small);
+    border: var(--components--buttons--border-width--bw-default) solid var(--core--colors--neutral--800);
+    border-radius: var(--components--buttons--border-radius--br-pill);
+    background-color: var(--core--colors--neutral--800);
+    box-shadow: none;
+    color: var(--components--buttons-primary--text--text-light-mode);
+    font-size: var(--core--font-size--displays--display-3);
+    line-height: var(--core--line-height--regular);
+    text-align: center;
+    letter-spacing: -.03em;
+    transform-style: preserve-3d;
+    justify-content: center;
+    align-items: center;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform .3s;
+    display: flex;
+}
+
 .primary-button:hover {
     color: var(--components--buttons-primary--text--text-light-mode);
     transform: scale3d(.94, .94, 1.01);
@@ -9400,6 +9423,16 @@ figcaption {
   background: #fff0f5;
 }
 
+.input-error {
+    border: #d25782;
+}
+
+.hint {
+    color: #D25782;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
 @media screen and (min-width: 1440px) {
     .utp---sidebar-layout-wrapper {
         grid-column-gap: 0px;
@@ -11899,6 +11932,7 @@ figcaption {
         flex-flow: wrap;
     }
 
+
     .stats-wrapper.horizontal-content.vertical-mbp {
         grid-row-gap: var(--globals--gaps--gap-default);
         text-align: center;
@@ -13465,6 +13499,12 @@ figcaption {
     #w-node-_9e8060c6-9399-36dc-4dad-4cf8518481a9-a91df22f,
     #w-node-_4ebdb337-ea04-199c-5179-7abe14e45c6c-a91df294 {
         grid-area: span 1 / span 1 / span 1 / span 1;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .paragraph-large.error-404-text {
+        text-align: center;
     }
 }
 
