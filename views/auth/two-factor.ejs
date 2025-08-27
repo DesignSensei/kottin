@@ -12,24 +12,24 @@
   </h2>
 
   <div>
-    <p class="paragraph-large" style="margin-bottom: 40px">
+    <p class="paragraph-large" style="margin-bottom: 32px">
       Enter the verification code we sent to your email or your authenticator
       app
     </p>
   </div>
 
-  <p class="paragraph-large">Type your 6-digit security code</p>
   <div id="login-form-wrapper" class="form-wrapper width-320px w-form">
     <form
-      id="auth-form"
-      name="otp-form"
-      action="/verify-otp"
+      id="two-factor-form"
+      name="two-factor-form"
+      action="/two-factor"
       method="POST"
-      aria-label="Log in"
-      novalidate
+      aria-label="Two-Factor VerifyS"
     >
       <!-- CSRF Token -->
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <!-- Hidden field that external JS will populate -->
+      <input type="hidden" name="code" id="otp-hidden-code" />
 
       <!-- OTP Input -->
       <div class="inner-container _487px _100-tablet">
@@ -39,8 +39,10 @@
             class="otp-input"
             type="text"
             inputmode="numeric"
+            pattern="[0-9]"
             maxlength="1"
             name="digit<%= i %>"
+            autocomplete="one-time-code"
             aria-label="Digit <%= i+1 %>"
             required
           />
@@ -58,16 +60,29 @@
           Verify
         </button>
       </div>
-
-      <p class="paragraph-large" style="text-align: center; margin-top: 20px">
-        Didn't get an email?
-        <a
-          href="/send-otp"
-          class="link-primary"
-          style="text-decoration: none; color: #d25782"
-          >Resend</a
-        >
-      </p>
     </form>
+
+    <p class="paragraph-large" style="text-align: center; margin-top: 20px">
+      Didn't get an email?
+      <button
+        type="submit"
+        class="primary-link"
+        style="
+          text-decoration: none;
+          color: #d25782;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          display: inline;
+        "
+        form="two-factor-form"
+        formmethod="POST"
+        formaction="/two-factor/resend"
+        formnovalidate
+      >
+        Resend
+      </button>
+    </p>
   </div>
 </div>

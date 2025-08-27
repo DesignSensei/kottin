@@ -30,6 +30,23 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    googleId: {
+      type: String,
+      index: true,
+      unique: true,
+      sparse: true,
+    },
+
+    displayName: {
+      type: String,
+      trim: true,
+    },
+
+    photo: {
+      type: String,
+      trim: true,
+    },
+
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -50,13 +67,26 @@ const userSchema = new mongoose.Schema(
       type: Date,
       select: false,
     },
+
+    resetPasswordToken: {
+      type: String,
+      select: false,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      select: false,
+    },
+
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // adds createdAt & updatedAt
   }
 );
-
-userSchema.index({ email: 1 }, { unique: true });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

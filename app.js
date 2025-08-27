@@ -1,30 +1,40 @@
+// app.js
+
 const path = require("path");
 require("dotenv").config();
-const connectDB = require("./config/db");
-const logger = require("./utils/logger");
+
 const express = require("express");
-const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const flash = require("connect-flash");
 const passport = require("passport");
 const csurf = require("csurf");
-const flash = require("connect-flash");
-const cookieParser = require("cookie-parser");
+const expressLayouts = require("express-ejs-layouts");
+const MongoStore = require("connect-mongo");
+const mongoose = require("mongoose");
+
+const connectDB = require("./config/db");
+const logger = require("./utils/logger");
 const authRoutes = require("./routes/authRoutes");
 
+// DB Config
 connectDB();
 
-// Initialize app
+/* ---------- Initialize App ---------- */
 const app = express();
 const PORT = process.env.PORT || 2000;
 
-// App Level Middleware
-// Body-parers, static, view engine
+/* ---------- App Level Middleware ---------- */
+/* ---------- Parsers & static ---------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
-app.set("view engine", "ejs");
 
-// Logging request methods/origin
+/* ---------- View engine ---------- */
+app.set("view engine", "ejs");
+app.use(expressLayouts);
+
+/* ---------- Request logging ---------- */
 app.use((req, res, next) => {
   res.on("finish", () => {
     logger.info(`${req.method} ${req.url} ${req.statusCode}`);
@@ -32,7 +42,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Setting up Express Session + Cookie
+/* ---------- Cookies + Session (must be before flash/passport/csurf) ---------- */
 app.use(cookieParser());
 app.use(
   session({
@@ -40,72 +50,72 @@ app.use(
     name: "sid",
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      client: mongoose.connection.getClient(),
+      collectionName: "sessions",
+    }),
     cookie: {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 2,
+      maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
 );
 
-// Setting up Flash Messages
+/* ---------- Flash Middleware ---------- */
 app.use(flash());
 
-// Initialize Passport to use sessions
+/* ---------- Passport Config ---------- */
+require("./config/passport")(passport);
+// Initialize Passport Middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-// CSURF Middleware
+/* ---------- CSRF Middleware ---------- */
 app.use(csurf());
+
+/* ---------- Locals available to all views ---------- */
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   res.locals.flash = req.flash();
   next();
 });
 
-// Layouts
-app.use(expressLayouts);
-app.set("layout", "layouts/shop-layout");
+/* ---------- Routes ---------- */
+app.use("/", authRoutes);
 
-// Routes
-app.use(authRoutes);
-
-// Catch unmatched routes
+/* ---------- Catch unmatched routes (create 404) ---------- */
 app.use((req, res, next) => {
-  const error = new Error("Page not found");
-  error.status = 404;
-  next(error);
+  const err = new Error("Page not found");
+  err.statusCode = 404;
+  next(err);
 });
 
-// Global Error Handler (CSRF + others)
+/* ---------- Global Error Handler (CSRF + others) ---------- */
 app.use((err, req, res, next) => {
   // CSRF errors
   if (err.code === "EBADCSRFTOKEN") {
+    res.status(403);
     req.flash("error", "Session expired or form tampered with. Please retry.");
-    return res.redirect(req.get("Referer" || "/"));
+    return res.redirect(req.get("Referer") || "/");
   }
 
-  // 404 errors
-  if (err.status === 404) {
+  if (err.statusCode === 404) {
     return res.status(404).render("auth/not-found");
   }
 
-  // All other errors (500 etc.)
-  logger.error(err.stack);
-  res.status(err.status || 500).render("error", { message: err.message });
+  logger.error(
+    `[${statusCode}] ${req.method} ${req.originalUrl} :: ${err.message}\n${
+      err.stack || ""
+    }`
+  );
+  return res
+    .status(err.statusCode || 500)
+    .render("error", { message: err.message || "Something went wrong" });
 });
 
-// Start Server after DB is ready
-async function start() {
-  try {
-    await connectDB();
-    app.listen(PORT, () =>
-      logger.info(`Server running on http://localhost:${PORT}`)
-    );
-  } catch (err) {
-    logger.error("Failed to start:", err);
-    process.exit(1);
-  }
-}
-start();
+/* ---------- Start server ---------- */
+app.listen(PORT, () =>
+  logger.info(`Server running on http://localhost:${PORT}`)
+);
