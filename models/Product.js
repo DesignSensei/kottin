@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
 
+// Tiny slugger (turns "Classic Tee" → "classic-tee")
+function slugify(s) {
+  return String(s)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // replace spaces/symbols with "-"
+    .replace(/^-+|-+$/g, ""); // trim hyphens from start/end
+}
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -19,7 +28,7 @@ const productSchema = new mongoose.Schema(
     },
 
     basePrice: {
-      type: mongoose.Types.Decimal128,
+      type: Number,
       required: true,
     },
 
@@ -39,7 +48,7 @@ const productSchema = new mongoose.Schema(
 
     // Array of image URLs
     images: {
-      type: [string],
+      type: [String],
       default: [],
     },
 
@@ -63,7 +72,19 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+// Auto-generate slug if missing
+productSchema.pre("validate", function (next) {
+  if (!this.slug && this.name) this.slug = slugify(this.name);
+  next();
+});
+
 // Text index for search
-productSchema.index({ name: "text", description: "text" });
+productSchema.index(
+  { name: "text", description: "text" },
+  { weights: { name: 5, description: 1 } }
+);
+
+// Helpful read index (common pattern you'll query)
+productSchema.index({ active: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Product", productSchema);

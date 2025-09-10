@@ -7,10 +7,10 @@ const sha256 = (str) => crypto.createHash("sha256").update(str).digest("hex");
 
 // Generate a 6-digit code
 const sixDigits = () =>
-  crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
+  crypto.randomInt(0, 1000000).toString().padStart(6, "0");
 
 class AuthService {
-  /* ----- Signup ----- */
+  /* --------------- Signup --------------- */
   static async registerUser({ email, password, firstName, lastName }) {
     // Check if email already exists
     const existingUser = await User.findOne({ email });
@@ -27,6 +27,8 @@ class AuthService {
         twoFactorEnabled: true,
       });
 
+      // Strip password before returning
+      user.password = undefined;
       return user;
     } catch (err) {
       if (err.code === 11000 && err.keyPattern?.email) {
@@ -36,7 +38,7 @@ class AuthService {
     }
   }
 
-  /* ----- Login ----- */
+  /* --------------- Login --------------- */
   static async loginUser({ email, password }) {
     const user = await User.findOne({ email }).select("+password");
 
@@ -52,18 +54,19 @@ class AuthService {
     return user;
   }
 
-  /* ----- Forgot Password ----- */
+  /* --------------- Forgot Password --------------- */
   static async createPasswordReset({ email }) {
     if (!email) throw new Error("Email is required");
 
-    const normalized = String(email).trim().toLowerCase();
-    const user = await User.findOne({ email: normalized });
+    const user = await User.findOne({ email });
     if (!user) return null; // To prevent account enumeration so that attackers don't know which emails are valid
 
     // Create reset token (store HASH, return RAW)
     const raw = crypto.randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
     user.resetPasswordToken = sha256(raw);
-    user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+    user.resetPasswordExpires = expiresAt;
 
     await user.save({ validateBeforeSave: false });
 
@@ -71,11 +74,11 @@ class AuthService {
       email: user.email,
       userId: user._id.toString(),
       token: raw,
-      expiresAt: user.resetPasswordExpires,
+      expiresAt: expiresAt.getTime(),
     };
   }
 
-  /* ----- Reset Password ----- */
+  /* --------------- Reset Password --------------- */
   static async setNewPassword({ token, password }) {
     // Use reset token to set new password
     const hash = sha256(String(token));
@@ -90,27 +93,79 @@ class AuthService {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
+    // clear any active OTP state
+    user.otpCode = undefined;
+    user.otpExpires = undefined;
+    user.otpAttempts = undefined;
+    user.otpMaxAttempts = undefined;
+
     await user.save();
-
     user.password = undefined;
-
     return user;
   }
 
-  /* ----- Create TwoFactor OTP ----- */
-  static async createTwoFactorChallenge() {
-    const code = sixDigits();
-    const digest = sha256(code);
-    const expiresAt = Date.now() + 5 * 60 * 1000;
+  /* --------------- Create TwoFactor OTP --------------- */
+  static async createTwoFactorChallenge(
+    userId,
+    { ttlMs = 5 * 60 * 1000, maxAttempts = 5 } = {}
+  ) {
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
 
-    return { code, digest, expiresAt };
+    const code = sixDigits();
+    const expiresAt = new Date(Date.now() + ttlMs);
+
+    user.otpCode = code;
+    user.otpExpires = expiresAt;
+    user.otpAttempts = 0;
+    user.otpMaxAttempts = maxAttempts;
+
+    await user.save({ validateBeforeSave: false });
+
+    return { code, expiresAt: expiresAt.getTime() };
   }
 
-  /* ----- Verify Two Factor ----- */
-  static verifyTwoFactor({ inputCode, digest, expiresAt }) {
-    if (!inputCode || !digest || !expiresAt) return false;
-    if (Date.now() > expiresAt) return false;
-    return sha256(String(inputCode).padStart(6, "0")) === digest;
+  /* --------------- Verify Two Factor (DB) --------------- */
+  static async verifyTwoFactor({ userId, inputCode }) {
+    const user = await User.findById(userId).select(
+      "+otpCode +otpExpires +otpAttempts +otpMaxAttempts"
+    );
+    if (!user || !user.otpCode || !user.otpExpires) {
+      return { ok: false, reason: "not_found" };
+    }
+
+    if (Date.now() > user.otpExpires.getTime()) {
+      user.otpCode = undefined;
+      user.otpExpires = undefined;
+      user.otpAttempts = undefined;
+      user.otpMaxAttempts = undefined;
+      await user.save({ validateBeforeSave: false });
+      return { ok: false, reason: "expired" };
+    }
+
+    const attempts = Number(user.otpAttempts || 0);
+    const max = Number(user.otpMaxAttempts || 5);
+    if (attempts >= max) return { ok: false, reason: "locked" };
+
+    const ok = String(inputCode).padStart(6, "0") === String(user.otpCode);
+
+    if (!ok) {
+      user.otpAttempts = attempts + 1;
+      await user.save({ validateBeforeSave: false });
+      return {
+        ok: false,
+        reason: user.otpAttempts >= max ? "locked" : "mismatch",
+      };
+    }
+
+    // On success, clear OTP fields
+    user.otpCode = undefined;
+    user.otpExpires = undefined;
+    user.otpAttempts = undefined;
+    user.otpMaxAttempts = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return { ok: true };
   }
 }
 

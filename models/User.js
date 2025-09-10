@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "super-admin"],
       default: "user",
     },
 
@@ -66,6 +66,18 @@ const userSchema = new mongoose.Schema(
     otpExpires: {
       type: Date,
       select: false,
+    },
+
+    otpAttempts: {
+      type: Number,
+      select: false,
+      default: 0,
+    },
+
+    otpMaxAttempts: {
+      type: Number,
+      select: false,
+      default: 5,
     },
 
     resetPasswordToken: {

@@ -1,74 +1,66 @@
 // controllers/authController.js
 
+const User = require("../models/User");
 const AuthService = require("../services/authService");
 const logger = require("../utils/logger");
 
 //─────────────────────────────── AUTH RENDER BLOCK (GET ROUTES) ───────────────────────────────//
 
 // Render Login Page
-exports.showLogin = (req, res) => {
+exports.getLogin = (req, res) => {
   res.render("auth/login", {
     layout: "layouts/auth-layout",
     title: "Log In",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/login.js"></script>`,
+    scripts: `<script src="/js/login.js"></script>`,
   });
 };
 
 // Render Signup Page
-exports.showSignup = (req, res) => {
+exports.getSignup = (req, res) => {
   res.render("auth/signup", {
     layout: "layouts/auth-layout",
     title: "Sign Up",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/signup.js"></script>`,
+    scripts: `<script src="/js/signup.js"></script>`,
   });
 };
 
 // Render Reset Password Page
-exports.showResetPassword = (req, res) => {
+exports.getResetPassword = (req, res) => {
   res.render("auth/reset-password", {
     layout: "layouts/auth-layout-no-index",
     title: "Reset Password",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/reset-password.js"></script>`,
+    scripts: `<script src="/js/reset-password.js"></script>`,
   });
 };
 
 // Render New Password Page
-exports.showNewPassword = (req, res) => {
+exports.getNewPassword = (req, res) => {
   res.render("auth/new-password", {
     layout: "layouts/auth-layout-no-index",
     title: "New Password",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/login.js"></script>`,
+    scripts: `<script src="/js/login.js"></script>`,
   });
 };
 
 // Render Two-Factor Page
-exports.showTwoFactor = (req, res) => {
+exports.getTwoFactor = (req, res) => {
+  // Optional guard if you don't have a middleware:
+  // if (!req.session.pending2FA) return res.redirect("/login");
   res.render("auth/two-factor", {
     layout: "layouts/auth-layout-no-index",
     title: "Two Factor",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `
-      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-      <script src="/js/two-factor.js"></script>
-    `,
+    scripts: `<script src="/js/two-factor.js"></script>`,
     csrfToken: req.csrfToken(),
   });
 };
 
 // Render Not Found Page
-exports.showNotFound = (req, res) => {
+exports.getNotFound = (req, res) => {
   res.render("auth/not-found", {
     layout: "layouts/auth-layout-no-index",
     title: "Not Found",
@@ -76,10 +68,18 @@ exports.showNotFound = (req, res) => {
   });
 };
 
+exports.getError = (req, res) => {
+  res.render("auth/error", {
+    layout: "layouts/auth-layout-no-index",
+    title: "Error",
+    wfPage: "66b93fd9c65755b8a91df18e",
+  });
+};
+
 //─────────────────────────────── AUTH ACTIONS (POST ROUTES) ───────────────────────────────//
 
 // Handle Signup Form
-exports.signup = async (req, res, next) => {
+exports.postSignup = async (req, res, next) => {
   try {
     const { email, password, firstName, lastName } = req.body;
 
@@ -90,15 +90,20 @@ exports.signup = async (req, res, next) => {
       lastName,
     });
 
-    // 2FA for new accounts
-    const { code, digest, expiresAt } = AuthService.createTwoFactorChallenge();
-    logger.info(`2FA code for ${user.email}: ${code}`);
+    // 2FA for new accounts (if you want to enforce right after signup)
+    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
+      user._id,
+      { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
+    );
+
+    if (process.env.NODE_ENV !== "production") {
+      logger.info(`2FA code for ${user.email}: ${code}`);
+    } // else: send via mail/SMS
 
     req.session.pending2FA = {
-      userId: user._id?.toString?.() || user.id,
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
-      digest,
       expiresAt,
     };
 
@@ -110,23 +115,26 @@ exports.signup = async (req, res, next) => {
 };
 
 // Handle Login Form
-exports.login = async (req, res, next) => {
+exports.postLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await AuthService.loginUser({ email, password });
 
     if (user.twoFactorEnabled) {
-      const { code, digest, expiresAt } =
-        AuthService.createTwoFactorChallenge();
+      const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
+        user._id,
+        { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
+      );
 
-      logger.info(`2FA code for ${user.email}: ${code}`);
+      if (process.env.NODE_ENV !== "production") {
+        logger.info(`2FA code for ${user.email}: ${code}`);
+      } // else: send via mail/SMS
 
       req.session.pending2FA = {
         userId: user._id.toString(),
         email: user.email,
         role: user.role,
-        digest,
         expiresAt,
       };
 
@@ -137,15 +145,18 @@ exports.login = async (req, res, next) => {
     return req.login(user, (err) => {
       if (err) return next(err);
       req.flash("success", "Welcome back!");
-      // Role-based redirect
-      return res.redirect(user.role === "admin" ? "/admin" : "/shop");
+      return res.redirect(
+        user.role === "super-admin" || user.role === "admin"
+          ? "/admin/dashboard"
+          : "/home"
+      );
     });
   } catch (err) {
     return next(err);
   }
 };
 
-exports.requestPasswordReset = async (req, res, next) => {
+exports.postRequestPasswordReset = async (req, res, next) => {
   try {
     const { email } = req.body;
 
@@ -153,12 +164,10 @@ exports.requestPasswordReset = async (req, res, next) => {
     if (result) {
       const baseUrl =
         process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
-
       const resetUrl = `${baseUrl}/new-password?token=${encodeURIComponent(
         result.token
       )}`;
-
-      logger.info("Password reset link:", resetUrl);
+      logger.info("Password reset link:", resetUrl); // dev; email/SMS in prod
     }
 
     req.flash("success", "If that email exists, we’ve sent a reset link.");
@@ -168,7 +177,7 @@ exports.requestPasswordReset = async (req, res, next) => {
   }
 };
 
-exports.setNewPassword = async (req, res, next) => {
+exports.postSetNewPassword = async (req, res, next) => {
   try {
     const { token, password, confirmPassword } = req.body;
 
@@ -182,14 +191,16 @@ exports.setNewPassword = async (req, res, next) => {
       return res.redirect(`/new-password?token=${encodeURIComponent(token)}`);
     }
 
-    // Verify Token + set New Password
     const user = await AuthService.setNewPassword({ token, password });
 
-    // Start session
     return req.login(user, (err) => {
       if (err) return next(err);
       req.flash("success", "Password updated. You’re now signed in.");
-      return res.redirect(user.role === "admin" ? "/admin" : "/shop");
+      return res.redirect(
+        user.role === "super-admin" || user.role === "admin"
+          ? "/admin/dashboard"
+          : "/home"
+      );
     });
   } catch (err) {
     req.flash("error", err.message || "Could not update password");
@@ -197,7 +208,7 @@ exports.setNewPassword = async (req, res, next) => {
   }
 };
 
-exports.verifyTwoFactor = async (req, res, next) => {
+exports.postVerifyTwoFactor = async (req, res, next) => {
   try {
     const pending = req.session.pending2FA;
     if (!pending) {
@@ -205,34 +216,57 @@ exports.verifyTwoFactor = async (req, res, next) => {
       return res.redirect("/login");
     }
 
-    const { code } = req.body;
-    const ok = AuthService.verifyTwoFactor({
-      inputCode: code,
-      digest: pending.digest,
-      expiresAt: pending.expiresAt,
+    const raw = req.body.code || "";
+    const inputCode = String(raw).replace(/\D/g, "").slice(0, 6);
+
+    const result = await AuthService.verifyTwoFactor({
+      userId: pending.userId,
+      inputCode,
     });
 
-    if (!ok) {
-      req.flash("error", "Invalid or expired code");
+    if (!result.ok) {
+      if (result.reason === "expired") {
+        req.session.pending2FA = null;
+        req.flash(
+          "error",
+          "Code expired. Please log in again to get a new code."
+        );
+        return res.redirect("/login");
+      }
+      if (result.reason === "locked") {
+        req.session.pending2FA = null;
+        req.flash("error", "Too many attempts. Please log in again.");
+        return res.redirect("/login");
+      }
+      // "mismatch" or "not_found"
+      req.flash("error", "Invalid or expired code. Please try again");
       return res.redirect("/two-factor");
     }
 
-    // Promote to logged-in user session
-    req.session.user = {
-      id: pending.userId,
-      email: pending.email,
-      role: pending.role,
-    };
-    delete req.session.pending2FA;
+    // Success → complete login via Passport
+    const user = await User.findById(pending.userId);
+    if (!user) {
+      req.session.pending2FA = null;
+      req.flash("error", "User not found.");
+      return res.redirect("/login");
+    }
 
-    req.flash("success", "2FA complete!");
-    return res.redirect(pending.role === "admin" ? "/admin" : "/shop");
+    req.session.pending2FA = null;
+    return req.login(user, (err) => {
+      if (err) return next(err);
+      req.flash("success", "2FA complete!");
+      return res.redirect(
+        user.role === "admin" || user.role === "super-admin"
+          ? "/admin/dashboard"
+          : "/home"
+      );
+    });
   } catch (err) {
     return next(err);
   }
 };
 
-exports.resendTwoFactor = async (req, res, next) => {
+exports.postResendTwoFactor = async (req, res, next) => {
   try {
     const pending = req.session.pending2FA;
     if (!pending) {
@@ -240,16 +274,15 @@ exports.resendTwoFactor = async (req, res, next) => {
       return res.redirect("/login");
     }
 
-    const { code, digest, expiresAt } =
-      await AuthService.createTwoFactorChallenge();
+    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
+      pending.userId,
+      { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
+    );
 
-    // Log only in dev; in prod you’d send via SMS/Email instead
     if (process.env.NODE_ENV !== "production") {
       logger.info(`New 2FA code for ${pending.email}: ${code}`);
-    }
+    } // else: send via mail/SMS
 
-    // Update the existing challenge
-    req.session.pending2FA.digest = digest;
     req.session.pending2FA.expiresAt = expiresAt;
 
     req.flash("success", "A new verification code has been sent.");
@@ -260,10 +293,11 @@ exports.resendTwoFactor = async (req, res, next) => {
 };
 
 // Handle logout
-exports.logout = (req, res, next) => {
+exports.postLogout = (req, res, next) => {
   req.logout((err) => {
     if (err) return next(err);
     req.session.destroy(() => {
+      // Ensure cookie name matches your session config; adjust if custom
       res.clearCookie("connect.sid", { path: "/" });
       if (req.accepts("json")) return res.status(200).json({ ok: true });
       return res.redirect("/login");

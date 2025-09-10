@@ -1,24 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Password toggle
-  const password = document.getElementById("password");
-  const toggle = document.getElementById("togglePassword");
+  // ---------------------- Password toggle ----------------------
+  const passwordInput = document.getElementById("password");
+  const togglePasswordBtn = document.getElementById("togglePassword");
 
-  if (password && toggle) {
-    let visible = false;
-
-    toggle.innerHTML = feather.icons["eye-off"].toSvg();
-    toggle.addEventListener("click", () => {
-      visible = !visible;
-      password.type = visible ? "text" : "password";
-      toggle.innerHTML = feather.icons[visible ? "eye" : "eye-off"].toSvg();
-      toggle.setAttribute(
+  if (passwordInput && togglePasswordBtn && window.feather) {
+    let isVisible = false;
+    togglePasswordBtn.innerHTML = feather.icons["eye-off"].toSvg();
+    togglePasswordBtn.addEventListener("click", () => {
+      isVisible = !isVisible;
+      passwordInput.type = isVisible ? "text" : "password";
+      togglePasswordBtn.innerHTML =
+        feather.icons[isVisible ? "eye" : "eye-off"].toSvg();
+      togglePasswordBtn.setAttribute(
         "aria-label",
-        visible ? "Hide password" : "Show password"
+        isVisible ? "Hide password" : "Show password"
       );
     });
   }
 
-  // Form Validation Messages
+  // ---------------------- Validation Messages ----------------------
   const messages = {
     email: {
       valueMissing: "Email is required",
@@ -30,61 +30,77 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
-  function getErrorMessage(field) {
-    const validity = field.validity;
-    const customMessages = messages[field.name] || {};
-
-    if (validity.valueMissing)
-      return customMessages.valueMissing || "This field is required";
-
-    if (validity.typeMismatch)
-      return customMessages.typeMismatch || "Please enter a valid value";
-
-    if (validity.tooShort)
-      return customMessages.tooShort || `Min length is ${field.minLength}`;
-
-    return field.validationMessage || "Please fix this field";
+  function getErrorMessage(inputField) {
+    const v = inputField.validity;
+    const custom = messages[inputField.name] || {};
+    if (v.valueMissing) return custom.valueMissing || "This field is required";
+    if (v.typeMismatch)
+      return custom.typeMismatch || "Please enter a valid value";
+    if (v.tooShort)
+      return custom.tooShort || `Min length is ${inputField.minLength}`;
+    return inputField.validationMessage || "Please fix this field";
   }
 
-  // Form submit + SweetAlert
-  const form = document.getElementById("auth-form");
+  // ---------------------- Form & helpers ----------------------
+  const form = document.getElementById("login-form");
+  if (!form) return;
 
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+  // Grab the inputs we care about
+  const trackedFields = ["email", "password"]
+    .map((name) => form.querySelector(`[name="${name}"]`))
+    .filter(Boolean);
 
-      // Clear out old hints & error styles
-      form.querySelectorAll(".hint").forEach((h) => h.remove());
-      form
-        .querySelectorAll(".input-error")
-        .forEach((f) => f.classList.remove("input-error"));
-
-      if (!form.checkValidity()) {
-        // Add hints under every invalid field
-        form.querySelectorAll(":invalid").forEach((field) => {
-          field.classList.add("input-error");
-
-          // Create hint
-          const hint = document.createElement("div");
-          hint.className = "hint";
-          hint.textContent = getErrorMessage(field);
-
-          // Place hint right under the input
-          field.insertAdjacentElement("afterend", hint);
-        });
-
-        // Grab the first invalid field and nudge the user with SweetAlert
-        const firstInvalid = form.querySelector(":invalid");
-        Swal.fire({
-          icon: "warning",
-          text: getErrorMessage(firstInvalid),
-          confirmButtonColor: "#D25782",
-        }).then(() => firstInvalid.focus());
-
-        return;
-      }
-
-      form.submit();
-    });
+  function setAriaInvalid(inputField, isInvalid) {
+    inputField.setAttribute("aria-invalid", isInvalid ? "true" : "false");
   }
+
+  function getErrorContainer(inputField) {
+    return form.querySelector(`.field-error[data-for="${inputField.name}"]`);
+  }
+
+  function clearFieldError(inputField) {
+    const container = getErrorContainer(inputField);
+    if (container) container.textContent = "";
+    inputField.classList.remove("input-error", "is-invalid");
+    setAriaInvalid(inputField, false);
+  }
+
+  function showFieldError(inputField) {
+    const container = getErrorContainer(inputField);
+    if (!container) return;
+
+    if (!inputField.checkValidity()) {
+      container.textContent = getErrorMessage(inputField);
+      inputField.classList.add("input-error", "is-invalid");
+      setAriaInvalid(inputField, true);
+    } else {
+      clearFieldError(inputField);
+    }
+  }
+
+  // Live validation: input/blur
+  trackedFields.forEach((inputField) => {
+    const eventType = inputField.type === "checkbox" ? "change" : "input";
+    inputField.addEventListener(eventType, () => showFieldError(inputField));
+    inputField.addEventListener("blur", () => showFieldError(inputField));
+  });
+
+  // Submit handling
+  form.addEventListener("submit", (event) => {
+    trackedFields.forEach((inputField) => showFieldError(inputField));
+
+    if (!form.checkValidity()) {
+      event.preventDefault();
+      const firstInvalidField = form.querySelector(":invalid");
+      if (firstInvalidField) firstInvalidField.focus();
+      return;
+    }
+
+    // Optional: prevent double submits
+    const submitButton = document.getElementById("submitBtn");
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.setAttribute("aria-busy", "true");
+    }
+  });
 });

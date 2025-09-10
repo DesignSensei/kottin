@@ -1,3 +1,5 @@
+// routes/authRoutes.js
+
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -9,17 +11,19 @@ const {
 } = require("../middleware/authMiddleware");
 
 /* ---------- Public pages (GET) ---------- */
-router.get("/login", ensureGuest, authController.showLogin);
+router.get("/login", ensureGuest, authController.getLogin);
 
-router.get("/signup", ensureGuest, authController.showSignup);
+router.get("/signup", ensureGuest, authController.getSignup);
 
-router.get("/reset-password", authController.showResetPassword);
+router.get("/reset-password", authController.getResetPassword);
 
-router.get("/new-password", authController.showNewPassword);
+router.get("/new-password", authController.getNewPassword);
 
-router.get("/two-factor", ensurePending2FA, authController.showTwoFactor);
+router.get("/two-factor", ensurePending2FA, authController.getTwoFactor);
 
-router.get("/not-found", authController.showNotFound);
+router.get("/not-found", authController.getNotFound);
+
+router.get("/error", authController.getError);
 
 /* ---------- Google OAuth ---------- */
 router.get(
@@ -37,22 +41,26 @@ router.get(
 );
 
 /* ---------- Auth actions (POST) ---------- */
-router.post("/signup", authController.signup);
+router.post("/signup", authController.postSignup);
 
-router.post("/login", authController.login);
+router.post("/login", authController.postLogin);
 
-router.post("/reset-password", authController.requestPasswordReset);
+router.post("/reset-password", authController.postRequestPasswordReset);
 
-router.post("/new-password", authController.setNewPassword);
+router.post("/new-password", authController.postSetNewPassword);
 
-router.post("/two-factor", ensurePending2FA, authController.verifyTwoFactor);
+router.post(
+  "/two-factor",
+  ensurePending2FA,
+  authController.postVerifyTwoFactor
+);
 
 router.post(
   "/two-factor/resend",
   ensurePending2FA,
-  authController.resendTwoFactor
+  authController.postResendTwoFactor
 );
 
-router.post("/logout", ensureAuth, authController.logout);
+router.post("/logout", ensureAuth, authController.postLogout);
 
 module.exports = router;

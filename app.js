@@ -15,7 +15,11 @@ const mongoose = require("mongoose");
 
 const connectDB = require("./config/db");
 const logger = require("./utils/logger");
+
+// Routes
 const authRoutes = require("./routes/authRoutes");
+const mainRoutes = require("./routes/mainRoutes");
+const shopRoutes = require("./routes/shopRoutes");
 
 // DB Config
 connectDB();
@@ -28,11 +32,12 @@ const PORT = process.env.PORT || 2000;
 /* ---------- Parsers & static ---------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
 /* ---------- View engine ---------- */
 app.set("view engine", "ejs");
 app.use(expressLayouts);
+app.set("layout", "layouts/shop-layout");
 
 /* ---------- Request logging ---------- */
 app.use((req, res, next) => {
@@ -42,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ---------- Cookies + Session (must be before flash/passport/csurf) ---------- */
+/* ---------- Cookies + Session ---------- */
 app.use(cookieParser());
 app.use(
   session({
@@ -78,12 +83,20 @@ app.use(csurf());
 /* ---------- Locals available to all views ---------- */
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
-  res.locals.flash = req.flash();
+  res.locals.flash = {
+    success: req.flash("success"),
+    error: req.flash("error"),
+    info: req.flash("info"),
+  };
+
+  res.locals.user = req.user || null;
   next();
 });
 
-/* ---------- Routes ---------- */
-app.use("/", authRoutes);
+/* ---------- Mount Routes ---------- */
+app.use("/", mainRoutes);
+app.use(authRoutes);
+app.use(shopRoutes);
 
 /* ---------- Catch unmatched routes (create 404) ---------- */
 app.use((req, res, next) => {
@@ -105,14 +118,15 @@ app.use((err, req, res, next) => {
     return res.status(404).render("auth/not-found");
   }
 
+  const statusCode = err.statusCode || 500;
   logger.error(
     `[${statusCode}] ${req.method} ${req.originalUrl} :: ${err.message}\n${
       err.stack || ""
     }`
   );
   return res
-    .status(err.statusCode || 500)
-    .render("error", { message: err.message || "Something went wrong" });
+    .status(statusCode)
+    .render("auth/error", { message: err.message || "Something went wrong" });
 });
 
 /* ---------- Start server ---------- */

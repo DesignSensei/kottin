@@ -13,7 +13,7 @@
   </h2>
   <div id="login-form-wrapper" class="form-wrapper width-320px w-form">
     <form
-      id="auth-form"
+      id="login-form"
       name="login-form"
       action="/login"
       method="POST"
@@ -33,6 +33,8 @@
           placeholder="Email"
           required
         />
+
+        <div class="field-error" data-for="email" aria-live="polite"></div>
       </div>
 
       <!-- Password -->
@@ -56,6 +58,8 @@
             <i data-feather="eye-off"></i>
           </button>
         </div>
+
+        <div class="field-error" data-for="password" aria-live="polite"></div>
       </div>
 
       <!-- Forgot Password -->
@@ -77,10 +81,26 @@
         <button
           type="submit"
           id="primary-button"
-          class="primary-button w-button"
+          class="primary-button-2 w-button"
         >
           Log In
         </button>
+      </div>
+
+      <!-- Don't have an account? -->
+      <div
+        class="inner-container _487px _100-tablet mg-top-default"
+        style="text-align: center"
+      >
+        <p class="paragraph-large">
+          Don't have an account?
+          <a
+            href="/signup"
+            class="primary-link"
+            style="text-decoration: none; color: #d25782"
+            >Sign Up</a
+          >
+        </p>
       </div>
     </form>
   </div>
