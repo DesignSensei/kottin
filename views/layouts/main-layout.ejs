@@ -5,10 +5,7 @@
 <html lang="en">
   <!--begin::Head-->
   <head>
-    <title><%= title %> | Freakum - Let's Get Your Freak On</title>
-    <meta charset="utf-8" />
-
-    <%- include("../partials/header-admin") %>
+    <%- include("../admin/partials/header-admin") %>
 
     <!-- No page indexing -->
     <%- include("../partials/meta-noindex") %>
@@ -54,12 +51,12 @@
       <!--begin::Page-->
       <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
         <!--begin::Header-->
-        <%- include("../partials/admin-navbar") %>
+        <%- include("../admin/partials/admin-navbar") %>
         <!--end::Header-->
         <!--begin::Wrapper-->
         <div class="app-wrapper flex-column flex-row-fluid" id="kt_app_wrapper">
           <!--begin::Sidebar-->
-          <%- include("../partials/sidebar") %>
+          <%- include("../admin/partials/sidebar") %>
           <!--end::Sidebar-->
 
           <!--begin::Main-->
@@ -3806,7 +3803,7 @@
 
             <div id="kt_app_footer" class="app-footer">
               <!--begin::Footer container-->
-              <%- include("../partials/app-footer") %>
+              <%- include("../admin/partials/app-footer") %>
               <!--end::Footer container-->
             </div>
             <!--end::Footer-->
@@ -8999,6 +8996,10 @@
     <script src="/assets/plugins/global/plugins.bundle.js"></script>
     <script src="/assets/js/scripts.bundle.js"></script>
     <!--end::Global Javascript Bundle-->
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!--end::Javascript-->
   </body>
   <!--end::Body-->

@@ -1,4 +1,11 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  // Ensure vendors are ready before using axios/Swal
+  if (window.vendorsReady) {
+    await window.vendorsReady;
+  } else if (window.ensureVendors) {
+    await window.ensureVendors();
+  }
+
   // ---------------------- Password toggle ----------------------
   const passwordInput = document.getElementById("password");
   const togglePasswordBtn = document.getElementById("togglePassword");
@@ -30,22 +37,26 @@ document.addEventListener("DOMContentLoaded", () => {
     },
   };
 
-  function getErrorMessage(inputField) {
-    const v = inputField.validity;
-    const custom = messages[inputField.name] || {};
-    if (v.valueMissing) return custom.valueMissing || "This field is required";
-    if (v.typeMismatch)
-      return custom.typeMismatch || "Please enter a valid value";
-    if (v.tooShort)
-      return custom.tooShort || `Min length is ${inputField.minLength}`;
-    return inputField.validationMessage || "Please fix this field";
+  function getErrorMessage(field) {
+    const validity = field.validity;
+    const customMessages = messages[field.name] || {};
+
+    if (validity.valueMissing)
+      return customMessages.valueMissing || "This field is required";
+
+    if (validity.typeMismatch)
+      return customMessages.typeMismatch || "Please enter a valid value";
+
+    if (validity.tooShort)
+      return customMessages.tooShort || `Minimum length is ${field.minLength}`;
+
+    return field.validationMessage || "Please fix this field";
   }
 
   // ---------------------- Form & helpers ----------------------
   const form = document.getElementById("login-form");
   if (!form) return;
 
-  // Grab the inputs we care about
   const trackedFields = ["email", "password"]
     .map((name) => form.querySelector(`[name="${name}"]`))
     .filter(Boolean);
@@ -78,29 +89,104 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Live validation: input/blur
+  // Live validation
   trackedFields.forEach((inputField) => {
     const eventType = inputField.type === "checkbox" ? "change" : "input";
     inputField.addEventListener(eventType, () => showFieldError(inputField));
     inputField.addEventListener("blur", () => showFieldError(inputField));
   });
 
-  // Submit handling
-  form.addEventListener("submit", (event) => {
+  // ---------------------- Submit handling (+ SweetAlert) ----------------------
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    // Update inline errors
     trackedFields.forEach((inputField) => showFieldError(inputField));
 
-    if (!form.checkValidity()) {
-      event.preventDefault();
-      const firstInvalidField = form.querySelector(":invalid");
-      if (firstInvalidField) firstInvalidField.focus();
-      return;
+    // Collect invalid fields
+    const invalidFields = trackedFields.filter((f) => !f.checkValidity());
+    if (invalidFields.length > 0) {
+      const firstInvalid = invalidFields[0];
+
+      // Fire SweetAlert and keep the user on the page
+      if (window.Swal) {
+        await Swal.fire({
+          icon: "error",
+          title: "Fix the highlighted field",
+          confirmButtonText: "Okay, got it",
+          allowOutsideClick: false,
+          allowEscapeKey: true,
+          buttonstyling: false,
+          customClass: {
+            title: "swal-title",
+            confirmButton: "swal-confirm-btn",
+          },
+        });
+      }
+
+      // Focus the first invalid field after the alert
+      firstInvalid.focus();
+      return; // stop submission
     }
 
-    // Optional: prevent double submits
-    const submitButton = document.getElementById("submitBtn");
+    // Collect form data
+    const formData = {
+      email: form.querySelector('[name="email"]').value,
+      password: form.querySelector('[name="password"]').value,
+    };
+
+    // Disable submit button
+    const submitButton = document.getElementById("submit-button");
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.setAttribute("aria-busy", "true");
+    }
+
+    try {
+      // Send data to backend
+      const response = await axios.post("/auth/login", formData);
+
+      // On success
+      if (window.Swal) {
+        await Swal.fire({
+          icon: "success",
+          title: "Login successful, redirecting you to shop",
+          confirmButtonText: "Okay, got it",
+          allowOutsideClick: false,
+          allowEscapeKey: true,
+          buttonstyling: false,
+          customClass: {
+            title: "swal-title",
+            confirmButton: "swal-confirm-btn",
+          },
+        });
+      }
+
+      // Redirect to shop page
+      window.location.href = "/";
+    } catch (error) {
+      // Handle errors
+      const errorMessage =
+        error.response?.data?.message || "Login failed. Please try again.";
+      if (window.Swal) {
+        await Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: errorMessage,
+          confirmButtonText: "Okay, got it",
+          buttonstyling: false,
+          customClass: {
+            title: "swal-title",
+            confirmButton: "swal-confirm-btn",
+          },
+        });
+      }
+
+      // Re-enable submit button
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.setAttribute("aria-busy", "false");
+      }
     }
   });
 });

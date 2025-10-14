@@ -1,0 +1,69 @@
+<!-- views/partials/header-admin.ejs -->
+
+<!-- Primary Meta Tags -->
+<title><%= title %> | Freakum - Let's Get Your Freak On</title>
+<meta charset="utf-8" />
+<meta name="description" content="Freakum admin." />
+<meta name="author" content="Freakum" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:title" content="Freakum – Let’s Get Your Freak On" />
+<meta
+  property="og:description"
+  content="Discover your desires with Freakum. Premium adult toys and essentials delivered discreetly to your doorstep."
+/>
+<meta
+  property="og:image"
+  content="https://cdn.freakum.com/assets/images/og-cover.jpg"
+/>
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://freakum.com" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:title" content="Freakum – Let’s Get Your Freak On" />
+<meta
+  property="twitter:description"
+  content="Explore our curated selection of premium adult toys, lubes, and accessories. Discreet shipping. Zero judgment."
+/>
+<meta
+  property="twitter:image"
+  content="https://cdn.freakum.com/assets/images/og-cover.jpg"
+/>
+<meta property="twitter:url" content="https://freakum.com" />
+
+<!-- Generator (optional) -->
+<meta name="generator" content="Freakum" />
+
+<!-- Font Preconnects -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- Fonts -->
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+/>
+
+<!-- Page-specific Stylesheets -->
+<%- typeof styles !== "undefined" ? styles : "" %>
+
+<!-- Global Stylesheets Bundle -->
+<link
+  href="/assets/plugins/global/plugins.bundle.css"
+  rel="stylesheet"
+  type="text/css"
+/>
+<link href="/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+<!-- End Global Stylesheets Bundle -->
+
+<!-- Favicon -->
+<link rel="shortcut icon" href="/assets/images/freakum-favicon.svg" />
+
+<!-- Frame Buster -->
+<script>
+  if (window.top !== window.self) {
+    window.top.location.replace(window.self.location.href);
+  }
+</script>

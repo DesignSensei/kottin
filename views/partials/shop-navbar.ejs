@@ -1,32 +1,170 @@
-<nav role="navigation" class="nav-menu-wrapper w-nav-menu">
-  <ul role="list" class="list-nav-menu">
-    <!-- Primary Links -->
-    <li class="link-nav-item">
-      <a href="/home-pages/home-v1" class="header-nav-link w-nav-link">Home</a>
-    </li>
-    <li class="link-nav-item">
-      <a href="/company-pages/about" class="header-nav-link w-nav-link"
-        >Fresh Pleasures</a
-      >
-    </li>
-    <li class="link-nav-item">
-      <a href="/company-pages/contact" class="header-nav-link w-nav-link"
-        >Hot Deals</a
-      >
-    </li>
-    <li class="link-nav-item">
-      <a href="/blog-pages/blog-v1" class="header-nav-link w-nav-link"
-        >Diaries</a
-      >
-    </li>
+<div
+  data-w-id="c5a10a2d-1ce6-df65-3882-e8a1991bf291"
+  data-animation="default"
+  data-collapse="medium"
+  data-duration="400"
+  data-easing="ease"
+  data-easing2="ease"
+  role="banner"
+  class="header-wrapper w-nav"
+>
+  <div class="container-default w-container">
+    <div
+      class="header-container-wrapper"
+      data-w-id="c5a10a2d-1ce6-df65-3882-e8a1991bf293"
+    >
+      <!-- Logo -->
+      <div class="logo-wrapper">
+        <a href="/home" class="logo-link w-inline-block">
+          <img src="assets/images/freakum-logo.png" alt="Logo" />
+        </a>
+      </div>
 
-    <li class="link-nav-item show-on-mobile">
-      <a
-        id="w-node-e9da5fd6-ab44-5b2f-81ad-6e5f36bfab9c-36bfab9c"
-        href="/shop-pages/all-products-v1"
-        class="primary-button w-inline-block"
-        ><div>Shop now</div></a
-      >
-    </li>
-  </ul>
-</nav>
+      <!-- Main Nav -->
+      <div class="nav-menu-middle">
+        <nav role="navigation" class="nav-menu-wrapper w-nav-menu">
+          <ul role="list" class="list-nav-menu">
+            <!-- Primary Links -->
+            <li class="link-nav-item">
+              <a href="/home-pages/home-v1" class="header-nav-link w-nav-link"
+                >Home</a
+              >
+            </li>
+            <li class="link-nav-item">
+              <a href="/company-pages/about" class="header-nav-link w-nav-link"
+                >Pleasures</a
+              >
+            </li>
+            <li class="link-nav-item">
+              <a
+                href="/company-pages/contact"
+                class="header-nav-link w-nav-link"
+                >Deals</a
+              >
+            </li>
+            <li class="link-nav-item">
+              <a href="/blog-pages/blog-v1" class="header-nav-link w-nav-link"
+                >About</a
+              >
+            </li>
+
+            <li class="link-nav-item show-on-mobile">
+              <a
+                id="w-node-e9da5fd6-ab44-5b2f-81ad-6e5f36bfab9c-36bfab9c"
+                href="/shop-pages/all-products-v1"
+                class="primary-button w-inline-block"
+                ><div>Shop now</div></a
+              >
+            </li>
+
+            <li></li>
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Right Side: cart, CTA, hamburger -->
+      <div class="nav-menu-right-side">
+        <%- include("../partials/cart") %>
+
+        <div class="buttons-row nav-menu-hidden-on-mobile">
+          <a
+            id="w-node-e9da5fd6-ab44-5b2f-81ad-6e5f36bfab9c-36bfab9c"
+            href="/shop-pages/all-products-v1"
+            class="primary-button-2 w-inline-block-2"
+            ><div>Shop now</div></a
+          >
+        </div>
+
+        <div
+          data-hover="true"
+          data-delay="0"
+          data-w-id="7a53f1eb-acd4-7a46-41bd-4dfb1797b564"
+          class="input-dropdown-2 w-dropdown"
+        >
+          <div class="input-dropdown-toggle w-dropdown-toggle">
+            <div>Account</div>
+            <div
+              style="
+                -webkit-transform: translate3d(0, 0, 0) scale3d(1, 1, 1)
+                  rotateX(0) rotateY(0) rotateZ(0deg) skew(0, 0);
+                -moz-transform: translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0)
+                  rotateY(0) rotateZ(0deg) skew(0, 0);
+                -ms-transform: translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0)
+                  rotateY(0) rotateZ(0deg) skew(0, 0);
+                transform: translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0)
+                  rotateY(0) rotateZ(0deg) skew(0, 0);
+              "
+              class="icon-font-rounded dropdown-arrow"
+            >
+              
+            </div>
+          </div>
+          <nav
+            style="
+              display: none;
+              opacity: 0;
+              -webkit-transform: translate3d(0, -10px, 0) scale3d(1, 1, 1)
+                rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);
+              -moz-transform: translate3d(0, -10px, 0) scale3d(1, 1, 1)
+                rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);
+              -ms-transform: translate3d(0, -10px, 0) scale3d(1, 1, 1)
+                rotateX(0) rotateY(0) rotateZ(0) skew(0, 0);
+              transform: translate3d(0, -10px, 0) scale3d(1, 1, 1) rotateX(0)
+                rotateY(0) rotateZ(0) skew(0, 0);
+            "
+            class="input-dropdown-list w-dropdown-list"
+          >
+            <div class="input-dropdown-card w-dyn-list">
+              <div role="list" class="grid-1-column gap-row-small w-dyn-items">
+                <div
+                  id="w-node-_7a53f1eb-acd4-7a46-41bd-4dfb1797b56d-a91df148"
+                  role="listitem"
+                  class="w-dyn-item"
+                >
+                  <a href="/category/bamboo" class="link-2 w-inline-block"
+                    ><div>Sign In</div></a
+                  >
+                </div>
+                <div
+                  id="w-node-_7a53f1eb-acd4-7a46-41bd-4dfb1797b56d-a91df148"
+                  role="listitem"
+                  class="w-dyn-item"
+                >
+                  <a href="/category/orchid" class="link-2 w-inline-block"
+                    ><div>My Profile</div></a
+                  >
+                </div>
+                <div
+                  id="w-node-_7a53f1eb-acd4-7a46-41bd-4dfb1797b56d-a91df148"
+                  role="listitem"
+                  class="w-dyn-item"
+                >
+                  <a href="/category/herb" class="link-2 w-inline-block"
+                    ><div>Orders</div></a
+                  >
+                </div>
+                <div
+                  id="w-node-_7a53f1eb-acd4-7a46-41bd-4dfb1797b56d-a91df148"
+                  role="listitem"
+                  class="w-dyn-item"
+                >
+                  <a href="/category/shrub" class="link-2 w-inline-block"
+                    ><div>Log out</div></a
+                  >
+                </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+        <div class="hamburger-menu w-nav-button">
+          <div class="hamburger-menu-flex">
+            <div class="hamburger-menu-line top"></div>
+            <div class="hamburger-menu-line middle"></div>
+            <div class="hamburger-menu-line bottom"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

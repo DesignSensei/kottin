@@ -55,24 +55,6 @@ exports.getTwoFactor = (req, res) => {
     title: "Two Factor",
     wfPage: "66b93fd9c65755b8a91df18e",
     scripts: `<script src="/js/two-factor.js"></script>`,
-    csrfToken: req.csrfToken(),
-  });
-};
-
-// Render Not Found Page
-exports.getNotFound = (req, res) => {
-  res.render("auth/not-found", {
-    layout: "layouts/auth-layout-no-index",
-    title: "Not Found",
-    wfPage: "66b93fd9c65755b8a91df18e",
-  });
-};
-
-exports.getError = (req, res) => {
-  res.render("auth/error", {
-    layout: "layouts/auth-layout-no-index",
-    title: "Error",
-    wfPage: "66b93fd9c65755b8a91df18e",
   });
 };
 

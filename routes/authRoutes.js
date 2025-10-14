@@ -21,10 +21,6 @@ router.get("/new-password", authController.getNewPassword);
 
 router.get("/two-factor", ensurePending2FA, authController.getTwoFactor);
 
-router.get("/not-found", authController.getNotFound);
-
-router.get("/error", authController.getError);
-
 /* ---------- Google OAuth ---------- */
 router.get(
   "/auth/google",

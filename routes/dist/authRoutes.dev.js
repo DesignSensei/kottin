@@ -21,8 +21,6 @@ router.get("/signup", ensureGuest, authController.getSignup);
 router.get("/reset-password", authController.getResetPassword);
 router.get("/new-password", authController.getNewPassword);
 router.get("/two-factor", ensurePending2FA, authController.getTwoFactor);
-router.get("/not-found", authController.getNotFound);
-router.get("/error", authController.getError);
 /* ---------- Google OAuth ---------- */
 
 router.get("/auth/google", passport.authenticate("google", {

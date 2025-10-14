@@ -11,10 +11,6 @@ router.get("/home", mainController.showHome);
 
 /* ==================== ADMIN ==================== */
 /* ---------- Public pages (GET) ---------- */
-router.get(
-  "/admin/dashboard",
-  ensureRole("admin", "super-admin"),
-  mainController.showDashboard
-);
+router.get("/admin/dashboard", mainController.showDashboard);
 
 module.exports = router;

@@ -21,7 +21,7 @@ const authRoutes = require("./routes/authRoutes");
 const mainRoutes = require("./routes/mainRoutes");
 const shopRoutes = require("./routes/shopRoutes");
 
-// DB Config
+// Connect to database
 connectDB();
 
 /* ---------- Initialize App ---------- */
@@ -32,17 +32,19 @@ const PORT = process.env.PORT || 2000;
 /* ---------- Parsers & static ---------- */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
 /* ---------- View engine ---------- */
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+/* ---------- Use layout ---------- */
 app.use(expressLayouts);
-app.set("layout", "layouts/shop-layout");
 
 /* ---------- Request logging ---------- */
 app.use((req, res, next) => {
   res.on("finish", () => {
-    logger.info(`${req.method} ${req.url} ${req.statusCode}`);
+    logger.info(`${req.method} ${req.originalUrl} ${res.statusCode}`);
   });
   next();
 });
@@ -87,8 +89,8 @@ app.use((req, res, next) => {
     success: req.flash("success"),
     error: req.flash("error"),
     info: req.flash("info"),
+    warning: req.flash("warning"),
   };
-
   res.locals.user = req.user || null;
   next();
 });
@@ -98,11 +100,13 @@ app.use("/", mainRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
 
-/* ---------- Catch unmatched routes (create 404) ---------- */
-app.use((req, res, next) => {
-  const err = new Error("Page not found");
-  err.statusCode = 404;
-  next(err);
+/* ---------- Catch unmatched routes (404) ---------- */
+app.use((req, res) => {
+  return res.status(404).render("auth/not-found", {
+    layout: "layouts/auth-layout-no-index",
+    title: "Not Found",
+    wfPage: "66b93fd9c65755b8a91df18e",
+  });
 });
 
 /* ---------- Global Error Handler (CSRF + others) ---------- */
@@ -114,19 +118,29 @@ app.use((err, req, res, next) => {
     return res.redirect(req.get("Referer") || "/");
   }
 
-  if (err.statusCode === 404) {
-    return res.status(404).render("auth/not-found");
+  const statusCode = err.statusCode || 500;
+
+  if (statusCode === 404) {
+    return res.status(404).render("auth/not-found", {
+      layout: "layouts/auth-layout-no-index",
+      title: "Not Found",
+      wfPage: "66b93fd9c65755b8a91df18e",
+    });
   }
 
-  const statusCode = err.statusCode || 500;
+  // Log and show error page with explicit layout
   logger.error(
     `[${statusCode}] ${req.method} ${req.originalUrl} :: ${err.message}\n${
       err.stack || ""
     }`
   );
-  return res
-    .status(statusCode)
-    .render("auth/error", { message: err.message || "Something went wrong" });
+
+  return res.status(statusCode).render("auth/error", {
+    layout: "layouts/auth-layout-no-index",
+    title: "Error",
+    message: err.message || "Something went wrong",
+    wfPage: "66b93fd9c65755b8a91df18e",
+  });
 });
 
 /* ---------- Start server ---------- */

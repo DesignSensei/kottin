@@ -11,7 +11,7 @@ exports.showHome = function (req, res) {
 };
 
 exports.showDashboard = function (req, res) {
-  res.render("webapp/dashboard", {
+  res.render("admin/dashboard", {
     layout: "layouts/main-layout",
     title: "Dashboard",
     pageTitle: "Dashboard",
