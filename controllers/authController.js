@@ -3,6 +3,7 @@
 const User = require("../models/User");
 const AuthService = require("../services/authService");
 const logger = require("../utils/logger");
+const passport = require("passport");
 
 //─────────────────────────────── AUTH RENDER BLOCK (GET ROUTES) ───────────────────────────────//
 
@@ -22,7 +23,7 @@ exports.getSignup = (req, res) => {
     layout: "layouts/auth-layout",
     title: "Sign Up",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script src="/js/signup.js"></script>`,
+    scripts: `<script type="module" src="/js/signup.js"></script>`,
   });
 };
 
@@ -64,7 +65,6 @@ exports.getTwoFactor = (req, res) => {
 exports.postSignup = async (req, res, next) => {
   try {
     const { email, password, firstName, lastName } = req.body;
-
     const user = await AuthService.registerUser({
       email,
       password,
@@ -72,7 +72,7 @@ exports.postSignup = async (req, res, next) => {
       lastName,
     });
 
-    // 2FA for new accounts (if you want to enforce right after signup)
+    // 2FA for new accounts
     const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
       user._id,
       { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
@@ -80,7 +80,7 @@ exports.postSignup = async (req, res, next) => {
 
     if (process.env.NODE_ENV !== "production") {
       logger.info(`2FA code for ${user.email}: ${code}`);
-    } // else: send via mail/SMS
+    }
 
     req.session.pending2FA = {
       userId: user._id.toString(),
@@ -89,59 +89,105 @@ exports.postSignup = async (req, res, next) => {
       expiresAt,
     };
 
-    req.flash("info", "Enter the 6-digit code we sent.");
-    return res.redirect("/two-factor");
+    return res.json({
+      success: true,
+      redirect: "/two-factor",
+      message: "Enter the 6-digit code sent to your email",
+      user: { name: user.firstName || user.email.split("@")[0] },
+    });
   } catch (err) {
-    return next(err);
+    return res.status(400).json({
+      success: false,
+      message: err.message || "Could not create account",
+    });
   }
 };
 
 // Handle Login Form
 exports.postLogin = async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await AuthService.loginUser({ email, password });
-
-    if (user.twoFactorEnabled) {
-      const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
-        user._id,
-        { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
-      );
-
-      if (process.env.NODE_ENV !== "production") {
-        logger.info(`2FA code for ${user.email}: ${code}`);
-      } // else: send via mail/SMS
-
-      req.session.pending2FA = {
-        userId: user._id.toString(),
-        email: user.email,
-        role: user.role,
-        expiresAt,
-      };
-
-      req.flash("info", "Enter the 6-digit code we sent.");
-      return res.redirect("/two-factor");
+  passport.authenticate("local", async (err, user, info) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: "Server error" });
+    }
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: info.message || "Invalid email or password",
+      });
     }
 
-    return req.login(user, (err) => {
-      if (err) return next(err);
-      req.flash("success", "Welcome back!");
-      return res.redirect(
-        user.role === "super-admin" || user.role === "admin"
-          ? "/admin/dashboard"
-          : "/home"
-      );
+    if (user.twoFactorEnabled) {
+      try {
+        const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
+          user._id,
+          { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
+        );
+
+        // SEND EMAIL
+        if (process.env.ENABLE_EMAIL === "true") {
+          try {
+            const { sendMail } = require("../utils/email");
+            await sendMail({
+              to: user.email,
+              subject: "Your 2FA Verification Code",
+              text: `Your code is: ${code}\n\nIt expires in 5 minutes.`,
+            });
+          } catch (emailErr) {
+            logger.error("Failed to send 2FA email:", emailErr);
+          }
+        }
+
+        if (process.env.NODE_ENV !== "production") {
+          logger.info(`2FA code for ${user.email}: ${code}`);
+        }
+
+        req.session.pending2FA = {
+          userId: user._id.toString(),
+          email: user.email,
+          role: user.role,
+          expiresAt,
+        };
+
+        return res.json({
+          success: true,
+          redirect: "/two-factor",
+          message: "Enter the 6-digit code we sent.",
+          user: {
+            name:
+              user.displayName || user.firstName || user.email.split("@")[0],
+          },
+        });
+      } catch (err) {
+        return next(err);
+      }
+    }
+
+    // No 2FA → normal login
+    req.login(user, (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Login failed" });
+      }
+      return res.json({
+        success: true,
+        redirect:
+          user.role === "super-admin" || user.role === "admin"
+            ? "/admin/dashboard"
+            : "/home",
+        message: "Welcome back!",
+        user: {
+          name: user.displayName || user.firstName || user.email.split("@")[0],
+        },
+      });
     });
-  } catch (err) {
-    return next(err);
-  }
+  })(req, res, next);
 };
 
+// Handle Password Reset Request
 exports.postRequestPasswordReset = async (req, res, next) => {
   try {
     const { email } = req.body;
-
     const result = await AuthService.createPasswordReset({ email });
     if (result) {
       const baseUrl =
@@ -151,42 +197,51 @@ exports.postRequestPasswordReset = async (req, res, next) => {
       )}`;
       logger.info("Password reset link:", resetUrl); // dev; email/SMS in prod
     }
-
-    req.flash("success", "If that email exists, we’ve sent a reset link.");
-    return res.redirect("/reset-password");
+    return res.json({
+      success: true,
+      message: "If that email exists, we've sent a reset link.",
+    });
   } catch (err) {
-    return next(err);
+    return res.status(400).json({
+      syccess: false,
+      message: err.message || "Could not process request",
+    });
   }
 };
 
 exports.postSetNewPassword = async (req, res, next) => {
   try {
     const { token, password, confirmPassword } = req.body;
-
     if (!token) {
-      req.flash("error", "Reset link is invalid or missing");
-      return res.redirect("/reset-password");
+      return res
+        .status(400)
+        .json({ success: false, message: "Reset link is invalid or missing" });
     }
-
     if (!password || password !== confirmPassword) {
-      req.flash("error", "Passwords do not match");
-      return res.redirect(`/new-password?token=${encodeURIComponent(token)}`);
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match" });
     }
-
     const user = await AuthService.setNewPassword({ token, password });
-
     return req.login(user, (err) => {
       if (err) return next(err);
-      req.flash("success", "Password updated. You’re now signed in.");
-      return res.redirect(
-        user.role === "super-admin" || user.role === "admin"
-          ? "/admin/dashboard"
-          : "/home"
-      );
+      return res.json({
+        success: true,
+        redirect:
+          user.role === "super-admin" || user.role === "admin"
+            ? "/admin/dashboard"
+            : "/home",
+        message: "Password updated. You’re now signed in.",
+        user: {
+          name: user.displayName || user.firstName || user.email.split("@")[0],
+        },
+      });
     });
   } catch (err) {
-    req.flash("error", err.message || "Could not update password");
-    return res.redirect("/reset-password");
+    return res.status(400).json({
+      success: false,
+      message: err.message || "Could not update password",
+    });
   }
 };
 
@@ -194,54 +249,56 @@ exports.postVerifyTwoFactor = async (req, res, next) => {
   try {
     const pending = req.session.pending2FA;
     if (!pending) {
-      req.flash("info", "Start by logging in.");
-      return res.redirect("/login");
+      return res
+        .status(400)
+        .json({ success: false, message: "Start by logging in." });
     }
-
     const raw = req.body.code || "";
     const inputCode = String(raw).replace(/\D/g, "").slice(0, 6);
-
     const result = await AuthService.verifyTwoFactor({
       userId: pending.userId,
       inputCode,
     });
-
     if (!result.ok) {
-      if (result.reason === "expired") {
+      if (result.reason === "expired" || result.reason === "locked") {
         req.session.pending2FA = null;
-        req.flash(
-          "error",
-          "Code expired. Please log in again to get a new code."
-        );
-        return res.redirect("/login");
+        return res.status(400).json({
+          success: false,
+          redirect: "/login",
+          message:
+            result.reason === "expired"
+              ? "Code expired. Please log in again to get a new code."
+              : "Too many attempts. Please log in again.",
+        });
       }
-      if (result.reason === "locked") {
-        req.session.pending2FA = null;
-        req.flash("error", "Too many attempts. Please log in again.");
-        return res.redirect("/login");
-      }
-      // "mismatch" or "not_found"
-      req.flash("error", "Invalid or expired code. Please try again");
-      return res.redirect("/two-factor");
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired code. Please try again",
+      });
     }
-
-    // Success → complete login via Passport
     const user = await User.findById(pending.userId);
     if (!user) {
       req.session.pending2FA = null;
-      req.flash("error", "User not found.");
-      return res.redirect("/login");
+      return res.status(400).json({
+        success: false,
+        redirect: "/login",
+        message: "User not found.",
+      });
     }
-
     req.session.pending2FA = null;
     return req.login(user, (err) => {
       if (err) return next(err);
-      req.flash("success", "2FA complete!");
-      return res.redirect(
-        user.role === "admin" || user.role === "super-admin"
-          ? "/admin/dashboard"
-          : "/home"
-      );
+      return res.json({
+        success: true,
+        redirect:
+          user.role === "admin" || user.role === "super-admin"
+            ? "/admin/dashboard"
+            : "/home",
+        message: "2FA complete!",
+        user: {
+          name: user.displayName || user.firstName || user.email.split("@")[0],
+        },
+      });
     });
   } catch (err) {
     return next(err);
@@ -252,8 +309,11 @@ exports.postResendTwoFactor = async (req, res, next) => {
   try {
     const pending = req.session.pending2FA;
     if (!pending) {
-      req.flash("info", "Start by logging in.");
-      return res.redirect("/login");
+      return res.status(400).json({
+        success: false,
+        redirect: "/login",
+        message: "Start by logging in.",
+      });
     }
 
     const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
@@ -261,28 +321,54 @@ exports.postResendTwoFactor = async (req, res, next) => {
       { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
     );
 
+    if (process.env.ENABLE_EMAIL === "true") {
+      try {
+        const { sendMail } = require("../utils/email");
+        await sendMail({
+          to: pending.email,
+          subject: "Your New 2FA Code",
+          text: `Your new verification code is: ${code}\n\nIt expires in 5 minutes.`,
+        });
+      } catch (emailErr) {
+        logger.error("Failed to send 2FA email:", emailErr);
+      }
+    }
+
     if (process.env.NODE_ENV !== "production") {
       logger.info(`New 2FA code for ${pending.email}: ${code}`);
-    } // else: send via mail/SMS
-
+    }
     req.session.pending2FA.expiresAt = expiresAt;
-
-    req.flash("success", "A new verification code has been sent.");
-    return res.redirect("/two-factor");
+    return res.json({
+      success: true,
+      message: "A new verification code has been sent.",
+    });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 // Handle logout
-exports.postLogout = (req, res, next) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    req.session.destroy(() => {
-      // Ensure cookie name matches your session config; adjust if custom
+exports.postLogout = (req, res) => {
+  // Passport's logout function
+  req.logout(function (error) {
+    if (error) {
+      logger.error("Logout Error:", error);
+      return res.status(500).json({ success: false, message: "Logout failed" });
+    }
+
+    // Destroy session
+    req.session.destroy((error) => {
+      if (error) {
+        logger.error("Session Destruction Error:", error);
+        // Don't return error - still try to clear cookies
+      }
+
+      // Clear all cookies with proper options
       res.clearCookie("connect.sid", { path: "/" });
-      if (req.accepts("json")) return res.status(200).json({ ok: true });
-      return res.redirect("/login");
+      res.clearCookie("jwt", { path: "/" });
+
+      // Return JSON, NOT redirect
+      return res.status(200).json({ success: true });
     });
   });
 };

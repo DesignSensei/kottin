@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node -r @babel/register app.js",
+    "dev": "nodemon -r @babel/register app.js"
   },
   "keywords": [],
   "author": "",
@@ -35,8 +35,12 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.28.3",
+    "@babel/core": "^7.28.5",
     "@babel/plugin-proposal-optional-chaining": "^7.21.0",
-    "@babel/plugin-transform-optional-chaining": "^7.27.1",
+    "@babel/plugin-transform-optional-chaining": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/register": "^7.28.3",
     "nodemon": "^3.1.10"
   }
 }

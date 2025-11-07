@@ -11,8 +11,6 @@ var session = require("express-session");
 
 var cookieParser = require("cookie-parser");
 
-var flash = require("connect-flash");
-
 var passport = require("passport");
 
 var csurf = require("csurf");
@@ -83,9 +81,6 @@ app.use(session({
     maxAge: 1000 * 60 * 60 * 24 * 7
   }
 }));
-/* ---------- Flash Middleware ---------- */
-
-app.use(flash());
 /* ---------- Passport Config ---------- */
 
 require("./config/passport")(passport); // Initialize Passport Middleware

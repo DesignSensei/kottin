@@ -1,23 +1,19 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  // Ensure vendors are ready before using axios/Swal
-  if (window.vendorsReady) {
-    await window.vendorsReady;
-  } else if (window.ensureVendors) {
-    await window.ensureVendors();
-  }
+// public/js/login.js
 
+document.addEventListener("DOMContentLoaded", () => {
   // ---------------------- Password toggle ----------------------
   const passwordInput = document.getElementById("password");
   const togglePasswordBtn = document.getElementById("togglePassword");
 
-  if (passwordInput && togglePasswordBtn && window.feather) {
+  if (passwordInput && togglePasswordBtn) {
     let isVisible = false;
     togglePasswordBtn.innerHTML = feather.icons["eye-off"].toSvg();
     togglePasswordBtn.addEventListener("click", () => {
       isVisible = !isVisible;
       passwordInput.type = isVisible ? "text" : "password";
-      togglePasswordBtn.innerHTML =
-        feather.icons[isVisible ? "eye" : "eye-off"].toSvg();
+      togglePasswordBtn.innerHTML = window.feather
+        ? feather.icons[isVisible ? "eye" : "eye-off"].toSvg()
+        : isVisible;
       togglePasswordBtn.setAttribute(
         "aria-label",
         isVisible ? "Hide password" : "Show password"
@@ -43,13 +39,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (validity.valueMissing)
       return customMessages.valueMissing || "This field is required";
-
     if (validity.typeMismatch)
       return customMessages.typeMismatch || "Please enter a valid value";
-
     if (validity.tooShort)
       return customMessages.tooShort || `Minimum length is ${field.minLength}`;
-
     return field.validationMessage || "Please fix this field";
   }
 
@@ -96,9 +89,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputField.addEventListener("blur", () => showFieldError(inputField));
   });
 
-  // ---------------------- Submit handling (+ SweetAlert) ----------------------
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  // ---------------------- Submit handling (+ SweetAlert2) ----------------------
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
     // Update inline errors
     trackedFields.forEach((inputField) => showFieldError(inputField));
@@ -107,30 +100,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const invalidFields = trackedFields.filter((f) => !f.checkValidity());
     if (invalidFields.length > 0) {
       const firstInvalid = invalidFields[0];
-
-      // Fire SweetAlert and keep the user on the page
       if (window.Swal) {
         await Swal.fire({
           icon: "error",
-          title: "Fix the highlighted field",
+          title: "Fill the required fields before proceeding",
           confirmButtonText: "Okay, got it",
           allowOutsideClick: false,
           allowEscapeKey: true,
-          buttonstyling: false,
           customClass: {
             title: "swal-title",
             confirmButton: "swal-confirm-btn",
           },
         });
       }
-
-      // Focus the first invalid field after the alert
       firstInvalid.focus();
-      return; // stop submission
+      return;
     }
 
     // Collect form data
     const formData = {
+      _csrf: form.querySelector('[name="_csrf"]').value,
       email: form.querySelector('[name="email"]').value,
       password: form.querySelector('[name="password"]').value,
     };
@@ -143,46 +132,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      // Send data to backend
-      const response = await axios.post("/auth/login", formData);
+      const response = await fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": formData._csrf,
+        },
+        credentials: "same-origin",
+        body: JSON.stringify(formData),
+      });
 
-      // On success
-      if (window.Swal) {
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error("Incorrect email or password");
+      }
+
+      if (data.success) {
         await Swal.fire({
           icon: "success",
-          title: "Login successful, redirecting you to shop",
-          confirmButtonText: "Okay, got it",
+          title: "Success",
+          text:
+            data.message ||
+            (data.user && data.user.name
+              ? `Welcome, ${data.user.name}!`
+              : "Logged in successfully"),
+          timer: 1500,
+          showConfirmButton: false,
           allowOutsideClick: false,
           allowEscapeKey: true,
-          buttonstyling: false,
           customClass: {
             title: "swal-title",
             confirmButton: "swal-confirm-btn",
           },
         });
+        window.location.href = data.redirect || "/";
+      } else {
+        throw new Error(data.message || "Invalid email or password");
       }
-
-      // Redirect to shop page
-      window.location.href = "/";
     } catch (error) {
-      // Handle errors
-      const errorMessage =
-        error.response?.data?.message || "Login failed. Please try again.";
       if (window.Swal) {
         await Swal.fire({
           icon: "error",
           title: "Login Failed",
-          text: errorMessage,
+          text: error.message || "Something went wrong!",
           confirmButtonText: "Okay, got it",
-          buttonstyling: false,
+          allowOutsideClick: false,
+          allowEscapeKey: true,
           customClass: {
             title: "swal-title",
             confirmButton: "swal-confirm-btn",
           },
         });
       }
-
-      // Re-enable submit button
+    } finally {
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.setAttribute("aria-busy", "false");

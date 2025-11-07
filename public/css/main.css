@@ -214,7 +214,6 @@ th {
 
 [class^="w-icon-"],
 [class*=" w-icon-"] {
-    speak: none;
     font-variant: normal;
     text-transform: none;
     -webkit-font-smoothing: antialiased;
@@ -1008,6 +1007,10 @@ textarea.w-select {
         left: auto;
         right: auto;
     }
+
+    .field-error {
+        text-align: left;
+    }
 }
 
 @media screen and (max-width: 767px) {
@@ -1348,7 +1351,6 @@ textarea.w-select {
     text-align: center;
     clear: both;
     -webkit-tap-highlight-color: #0000;
-    tap-highlight-color: #0000;
     background: #ddd;
     height: 300px;
     position: relative;
@@ -1379,7 +1381,6 @@ textarea.w-select {
     z-index: 2;
     text-align: center;
     -webkit-tap-highlight-color: #0000;
-    tap-highlight-color: #0000;
     height: 40px;
     margin: auto;
     padding-top: 10px;
@@ -1444,7 +1445,6 @@ textarea.w-select {
     cursor: pointer;
     color: #fff;
     -webkit-tap-highlight-color: #0000;
-    tap-highlight-color: #0000;
     -webkit-user-select: none;
     user-select: none;
     width: 80px;
@@ -1498,6 +1498,16 @@ textarea.w-select {
 
 .w-slider-force-show {
     display: block !important;
+}
+
+.custom-dropdown-arrow {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.custom-dropdown-arrow:hover,
+.w-dropdown:hover .custom-dropdown-arrow {
+    transform: rotateZ(180deg) !important;
 }
 
 .w-dropdown {
@@ -6348,6 +6358,16 @@ figcaption {
     grid-template-columns: repeat(auto-fit, minmax(48px, 48px));
 }
 
+form button.link-2 {
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    outline: none
+}
+
 .square-icon {
     border-radius: var(--components--icons--border-radius--br-regular);
     width: 48px;
@@ -7111,6 +7131,40 @@ figcaption {
     font-weight: 600;
     font-family: "Cameliya";
     letter-spacing: 0.050em;
+}
+
+/* Full-page loading overlay – invisible until the class is added */
+.swal2-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.92);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    font-family: "Inter", sans-serif;
+}
+
+/* Small spinner */
+.swal2-loading-spinner {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 12px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.swal2-loading-text {
+    font-size: 1.1rem;
+    color: #555;
+    margin: 0;
+}
+
+.swal2-no-padding {
+    padding: 0 !important;
 }
 
 .password-wrapper {
@@ -9535,10 +9589,26 @@ figcaption {
 }
 
 .field-error {
-    margin-top: 4px;
+    margin-top: 8px;
     color: #d25782;
     font-size: 0.875rem;
     line-height: 1.2;
+}
+
+.greeting {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    max-width: 100px;
+}
+
+.user-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    flex-shrink: 1;
 }
 
 @media screen and (min-width: 1440px) {
@@ -9702,6 +9772,11 @@ figcaption {
 }
 
 @media screen and (max-width: 991px) {
+
+    .nav-menu-right-side {
+            width: 100%;
+        }
+
     h1 {
         font-size: var(--core--font-size--headings-tablet--h1);
     }
@@ -13613,6 +13688,15 @@ figcaption {
 @media screen and (max-width: 500px) {
     .paragraph-large.error-404-text {
         text-align: center;
+    }
+
+    .swal2-loading-spinner {
+        width: 28px;
+        height: 28px;
+    }
+
+    .swal2-loading-text {
+        font-size: 1rem;
     }
 }
 

@@ -95,8 +95,7 @@ exports.postSignup = function _callee(req, res, next) {
 
           if (process.env.NODE_ENV !== "production") {
             logger.info("2FA code for ".concat(user.email, ": ").concat(code));
-          } // else: send via mail/SMS
-
+          }
 
           req.session.pending2FA = {
             userId: user._id.toString(),
@@ -104,107 +103,117 @@ exports.postSignup = function _callee(req, res, next) {
             role: user.role,
             expiresAt: expiresAt
           };
-          req.flash("info", "Enter the 6-digit code we sent.");
-          return _context.abrupt("return", res.redirect("/two-factor"));
+          return _context.abrupt("return", res.json({
+            success: true,
+            redirect: "/two-factor",
+            message: "Enter the 6-digit code sent to your email",
+            user: {
+              name: user.firstName || user.email.split("@")[0]
+            }
+          }));
 
-        case 16:
-          _context.prev = 16;
+        case 15:
+          _context.prev = 15;
           _context.t0 = _context["catch"](0);
-          return _context.abrupt("return", next(_context.t0));
+          return _context.abrupt("return", res.status(400).json({
+            success: false,
+            message: _context.t0.message || "Could not create account"
+          }));
 
-        case 19:
+        case 18:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 16]]);
+  }, null, null, [[0, 15]]);
 }; // Handle Login Form
 
 
-exports.postLogin = function _callee2(req, res, next) {
-  var _req$body2, email, password, user, _ref2, code, expiresAt;
+exports.postLogin = function (req, res, next) {
+  passport.authenticate("local", function (err, user, info) {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        message: "Server error"
+      });
+    }
 
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: info.message || "Invalid email or password"
+      });
+    }
+
+    if (user.twoFactorEnabled) {
+      AuthService.createTwoFactorChallenge(user._id, {
+        ttlMs: 5 * 60 * 1000,
+        cost: 12,
+        maxAttempts: 5
+      }).then(function (_ref2) {
+        var code = _ref2.code,
+            expiresAt = _ref2.expiresAt;
+
+        if (process.env.NODE_ENV !== "production") {
+          logger.info("2FA code for ".concat(user.email, ": ").concat(code));
+        }
+
+        req.session.pending2FA = {
+          userId: user._id.toString(),
+          email: user.email,
+          role: user.role,
+          expiresAt: expiresAt
+        };
+        return res.json({
+          success: true,
+          redirect: "/two-factor",
+          message: "Enter the 6-digit code we sent.",
+          user: {
+            name: user.displayName || user.firstName || user.email.split("@")[0]
+          }
+        });
+      })["catch"](function (err) {
+        return next(err);
+      });
+      return;
+    }
+
+    req.login(user, function (err) {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          message: "Login failed"
+        });
+      }
+
+      return res.json({
+        success: true,
+        redirect: user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home",
+        message: "Welcome back!",
+        user: {
+          name: user.displayName || user.firstName || user.email.split("@")[0]
+        }
+      });
+    });
+  })(req, res, next);
+}; // Handle Password Reset Request
+
+
+exports.postRequestPasswordReset = function _callee2(req, res, next) {
+  var email, result, baseUrl, resetUrl;
   return regeneratorRuntime.async(function _callee2$(_context2) {
     while (1) {
       switch (_context2.prev = _context2.next) {
         case 0:
           _context2.prev = 0;
-          _req$body2 = req.body, email = _req$body2.email, password = _req$body2.password;
-          _context2.next = 4;
-          return regeneratorRuntime.awrap(AuthService.loginUser({
-            email: email,
-            password: password
-          }));
-
-        case 4:
-          user = _context2.sent;
-
-          if (!user.twoFactorEnabled) {
-            _context2.next = 15;
-            break;
-          }
-
-          _context2.next = 8;
-          return regeneratorRuntime.awrap(AuthService.createTwoFactorChallenge(user._id, {
-            ttlMs: 5 * 60 * 1000,
-            cost: 12,
-            maxAttempts: 5
-          }));
-
-        case 8:
-          _ref2 = _context2.sent;
-          code = _ref2.code;
-          expiresAt = _ref2.expiresAt;
-
-          if (process.env.NODE_ENV !== "production") {
-            logger.info("2FA code for ".concat(user.email, ": ").concat(code));
-          } // else: send via mail/SMS
-
-
-          req.session.pending2FA = {
-            userId: user._id.toString(),
-            email: user.email,
-            role: user.role,
-            expiresAt: expiresAt
-          };
-          req.flash("info", "Enter the 6-digit code we sent.");
-          return _context2.abrupt("return", res.redirect("/two-factor"));
-
-        case 15:
-          return _context2.abrupt("return", req.login(user, function (err) {
-            if (err) return next(err);
-            req.flash("success", "Welcome back!");
-            return res.redirect(user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home");
-          }));
-
-        case 18:
-          _context2.prev = 18;
-          _context2.t0 = _context2["catch"](0);
-          return _context2.abrupt("return", next(_context2.t0));
-
-        case 21:
-        case "end":
-          return _context2.stop();
-      }
-    }
-  }, null, null, [[0, 18]]);
-};
-
-exports.postRequestPasswordReset = function _callee3(req, res, next) {
-  var email, result, baseUrl, resetUrl;
-  return regeneratorRuntime.async(function _callee3$(_context3) {
-    while (1) {
-      switch (_context3.prev = _context3.next) {
-        case 0:
-          _context3.prev = 0;
           email = req.body.email;
-          _context3.next = 4;
+          _context2.next = 4;
           return regeneratorRuntime.awrap(AuthService.createPasswordReset({
             email: email
           }));
 
         case 4:
-          result = _context3.sent;
+          result = _context2.sent;
 
           if (result) {
             baseUrl = process.env.APP_URL || "".concat(req.protocol, "://").concat(req.get("host"));
@@ -212,80 +221,198 @@ exports.postRequestPasswordReset = function _callee3(req, res, next) {
             logger.info("Password reset link:", resetUrl); // dev; email/SMS in prod
           }
 
-          req.flash("success", "If that email exists, we’ve sent a reset link.");
-          return _context3.abrupt("return", res.redirect("/reset-password"));
+          return _context2.abrupt("return", res.json({
+            success: true,
+            message: "If that email exists, we've sent a reset link."
+          }));
 
-        case 10:
-          _context3.prev = 10;
-          _context3.t0 = _context3["catch"](0);
-          return _context3.abrupt("return", next(_context3.t0));
+        case 9:
+          _context2.prev = 9;
+          _context2.t0 = _context2["catch"](0);
+          return _context2.abrupt("return", res.status(400).json({
+            syccess: false,
+            message: _context2.t0.message || "Could not process request"
+          }));
 
-        case 13:
+        case 12:
         case "end":
-          return _context3.stop();
+          return _context2.stop();
       }
     }
-  }, null, null, [[0, 10]]);
+  }, null, null, [[0, 9]]);
 };
 
-exports.postSetNewPassword = function _callee4(req, res, next) {
-  var _req$body3, token, password, confirmPassword, user;
+exports.postSetNewPassword = function _callee3(req, res, next) {
+  var _req$body2, token, password, confirmPassword, user;
 
-  return regeneratorRuntime.async(function _callee4$(_context4) {
+  return regeneratorRuntime.async(function _callee3$(_context3) {
     while (1) {
-      switch (_context4.prev = _context4.next) {
+      switch (_context3.prev = _context3.next) {
         case 0:
-          _context4.prev = 0;
-          _req$body3 = req.body, token = _req$body3.token, password = _req$body3.password, confirmPassword = _req$body3.confirmPassword;
+          _context3.prev = 0;
+          _req$body2 = req.body, token = _req$body2.token, password = _req$body2.password, confirmPassword = _req$body2.confirmPassword;
 
           if (token) {
-            _context4.next = 5;
+            _context3.next = 4;
             break;
           }
 
-          req.flash("error", "Reset link is invalid or missing");
-          return _context4.abrupt("return", res.redirect("/reset-password"));
+          return _context3.abrupt("return", res.status(400).json({
+            success: false,
+            message: "Reset link is invalid or missing"
+          }));
 
-        case 5:
+        case 4:
           if (!(!password || password !== confirmPassword)) {
-            _context4.next = 8;
+            _context3.next = 6;
             break;
           }
 
-          req.flash("error", "Passwords do not match");
-          return _context4.abrupt("return", res.redirect("/new-password?token=".concat(encodeURIComponent(token))));
+          return _context3.abrupt("return", res.status(400).json({
+            success: false,
+            message: "Passwords do not match"
+          }));
 
-        case 8:
-          _context4.next = 10;
+        case 6:
+          _context3.next = 8;
           return regeneratorRuntime.awrap(AuthService.setNewPassword({
             token: token,
             password: password
           }));
 
-        case 10:
-          user = _context4.sent;
-          return _context4.abrupt("return", req.login(user, function (err) {
+        case 8:
+          user = _context3.sent;
+          return _context3.abrupt("return", req.login(user, function (err) {
             if (err) return next(err);
-            req.flash("success", "Password updated. You’re now signed in.");
-            return res.redirect(user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home");
+            return res.json({
+              success: true,
+              redirect: user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home",
+              message: "Password updated. You’re now signed in.",
+              user: {
+                name: user.displayName || user.firstName || user.email.split("@")[0]
+              }
+            });
+          }));
+
+        case 12:
+          _context3.prev = 12;
+          _context3.t0 = _context3["catch"](0);
+          return _context3.abrupt("return", res.status(400).json({
+            success: false,
+            message: _context3.t0.message || "Could not update password"
+          }));
+
+        case 15:
+        case "end":
+          return _context3.stop();
+      }
+    }
+  }, null, null, [[0, 12]]);
+};
+
+exports.postVerifyTwoFactor = function _callee4(req, res, next) {
+  var pending, raw, inputCode, result, user;
+  return regeneratorRuntime.async(function _callee4$(_context4) {
+    while (1) {
+      switch (_context4.prev = _context4.next) {
+        case 0:
+          _context4.prev = 0;
+          pending = req.session.pending2FA;
+
+          if (pending) {
+            _context4.next = 4;
+            break;
+          }
+
+          return _context4.abrupt("return", res.status(400).json({
+            success: false,
+            message: "Start by logging in."
+          }));
+
+        case 4:
+          raw = req.body.code || "";
+          inputCode = String(raw).replace(/\D/g, "").slice(0, 6);
+          _context4.next = 8;
+          return regeneratorRuntime.awrap(AuthService.verifyTwoFactor({
+            userId: pending.userId,
+            inputCode: inputCode
+          }));
+
+        case 8:
+          result = _context4.sent;
+
+          if (result.ok) {
+            _context4.next = 14;
+            break;
+          }
+
+          if (!(result.reason === "expired" || result.reason === "locked")) {
+            _context4.next = 13;
+            break;
+          }
+
+          req.session.pending2FA = null;
+          return _context4.abrupt("return", res.status(400).json({
+            success: false,
+            redirect: "/login",
+            message: result.reason === "expired" ? "Code expired. Please log in again to get a new code." : "Too many attempts. Please log in again."
+          }));
+
+        case 13:
+          return _context4.abrupt("return", res.status(400).json({
+            success: false,
+            message: "Invalid or expired code. Please try again"
           }));
 
         case 14:
-          _context4.prev = 14;
-          _context4.t0 = _context4["catch"](0);
-          req.flash("error", _context4.t0.message || "Could not update password");
-          return _context4.abrupt("return", res.redirect("/reset-password"));
+          _context4.next = 16;
+          return regeneratorRuntime.awrap(User.findById(pending.userId));
 
-        case 18:
+        case 16:
+          user = _context4.sent;
+
+          if (user) {
+            _context4.next = 20;
+            break;
+          }
+
+          req.session.pending2FA = null;
+          return _context4.abrupt("return", res.status(400).json({
+            success: false,
+            redirect: "/login",
+            message: "User not found."
+          }));
+
+        case 20:
+          req.session.pending2FA = null;
+          return _context4.abrupt("return", req.login(user, function (err) {
+            if (err) return next(err);
+            return res.json({
+              success: true,
+              redirect: user.role === "admin" || user.role === "super-admin" ? "/admin/dashboard" : "/home",
+              message: "2FA complete!",
+              user: {
+                name: user.displayName || user.firstName || user.email.split("@")[0]
+              }
+            });
+          }));
+
+        case 24:
+          _context4.prev = 24;
+          _context4.t0 = _context4["catch"](0);
+          return _context4.abrupt("return", next(_context4.t0));
+
+        case 27:
         case "end":
           return _context4.stop();
       }
     }
-  }, null, null, [[0, 14]]);
+  }, null, null, [[0, 24]]);
 };
 
-exports.postVerifyTwoFactor = function _callee5(req, res, next) {
-  var pending, raw, inputCode, result, user;
+exports.postResendTwoFactor = function _callee5(req, res, next) {
+  var pending, _ref3, code, expiresAt;
+
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
@@ -294,142 +421,50 @@ exports.postVerifyTwoFactor = function _callee5(req, res, next) {
           pending = req.session.pending2FA;
 
           if (pending) {
-            _context5.next = 5;
+            _context5.next = 4;
             break;
           }
 
-          req.flash("info", "Start by logging in.");
-          return _context5.abrupt("return", res.redirect("/login"));
-
-        case 5:
-          raw = req.body.code || "";
-          inputCode = String(raw).replace(/\D/g, "").slice(0, 6);
-          _context5.next = 9;
-          return regeneratorRuntime.awrap(AuthService.verifyTwoFactor({
-            userId: pending.userId,
-            inputCode: inputCode
+          return _context5.abrupt("return", res.status(400).json({
+            success: false,
+            redirect: "/login",
+            message: "Start by logging in."
           }));
 
-        case 9:
-          result = _context5.sent;
-
-          if (result.ok) {
-            _context5.next = 21;
-            break;
-          }
-
-          if (!(result.reason === "expired")) {
-            _context5.next = 15;
-            break;
-          }
-
-          req.session.pending2FA = null;
-          req.flash("error", "Code expired. Please log in again to get a new code.");
-          return _context5.abrupt("return", res.redirect("/login"));
-
-        case 15:
-          if (!(result.reason === "locked")) {
-            _context5.next = 19;
-            break;
-          }
-
-          req.session.pending2FA = null;
-          req.flash("error", "Too many attempts. Please log in again.");
-          return _context5.abrupt("return", res.redirect("/login"));
-
-        case 19:
-          // "mismatch" or "not_found"
-          req.flash("error", "Invalid or expired code. Please try again");
-          return _context5.abrupt("return", res.redirect("/two-factor"));
-
-        case 21:
-          _context5.next = 23;
-          return regeneratorRuntime.awrap(User.findById(pending.userId));
-
-        case 23:
-          user = _context5.sent;
-
-          if (user) {
-            _context5.next = 28;
-            break;
-          }
-
-          req.session.pending2FA = null;
-          req.flash("error", "User not found.");
-          return _context5.abrupt("return", res.redirect("/login"));
-
-        case 28:
-          req.session.pending2FA = null;
-          return _context5.abrupt("return", req.login(user, function (err) {
-            if (err) return next(err);
-            req.flash("success", "2FA complete!");
-            return res.redirect(user.role === "admin" || user.role === "super-admin" ? "/admin/dashboard" : "/home");
-          }));
-
-        case 32:
-          _context5.prev = 32;
-          _context5.t0 = _context5["catch"](0);
-          return _context5.abrupt("return", next(_context5.t0));
-
-        case 35:
-        case "end":
-          return _context5.stop();
-      }
-    }
-  }, null, null, [[0, 32]]);
-};
-
-exports.postResendTwoFactor = function _callee6(req, res, next) {
-  var pending, _ref3, code, expiresAt;
-
-  return regeneratorRuntime.async(function _callee6$(_context6) {
-    while (1) {
-      switch (_context6.prev = _context6.next) {
-        case 0:
-          _context6.prev = 0;
-          pending = req.session.pending2FA;
-
-          if (pending) {
-            _context6.next = 5;
-            break;
-          }
-
-          req.flash("info", "Start by logging in.");
-          return _context6.abrupt("return", res.redirect("/login"));
-
-        case 5:
-          _context6.next = 7;
+        case 4:
+          _context5.next = 6;
           return regeneratorRuntime.awrap(AuthService.createTwoFactorChallenge(pending.userId, {
             ttlMs: 5 * 60 * 1000,
             cost: 12,
             maxAttempts: 5
           }));
 
-        case 7:
-          _ref3 = _context6.sent;
+        case 6:
+          _ref3 = _context5.sent;
           code = _ref3.code;
           expiresAt = _ref3.expiresAt;
 
           if (process.env.NODE_ENV !== "production") {
             logger.info("New 2FA code for ".concat(pending.email, ": ").concat(code));
-          } // else: send via mail/SMS
-
+          }
 
           req.session.pending2FA.expiresAt = expiresAt;
-          req.flash("success", "A new verification code has been sent.");
-          return _context6.abrupt("return", res.redirect("/two-factor"));
+          return _context5.abrupt("return", res.json({
+            success: true,
+            message: "A new verification code has been sent."
+          }));
 
-        case 16:
-          _context6.prev = 16;
-          _context6.t0 = _context6["catch"](0);
-          next(_context6.t0);
+        case 14:
+          _context5.prev = 14;
+          _context5.t0 = _context5["catch"](0);
+          return _context5.abrupt("return", next(_context5.t0));
 
-        case 19:
+        case 17:
         case "end":
-          return _context6.stop();
+          return _context5.stop();
       }
     }
-  }, null, null, [[0, 16]]);
+  }, null, null, [[0, 14]]);
 }; // Handle logout
 
 

@@ -1,0 +1,56 @@
+<!-- views/partials/account-dropdown.ejs -->
+
+<div
+  data-hover="true"
+  data-delay="0"
+  data-w-id="7a53f1eb-acd4-7a46-41bd-4dfb1797b564"
+  class="input-dropdown-2 w-dropdown"
+>
+  <div class="input-dropdown-toggle w-dropdown-toggle">
+    <div class="greeting">
+      <% if (user) { %> Hi,
+      <span class="user-name"><%= user.firstName %></span> <% } else { %>
+      Account <% } %>
+    </div>
+    <div style="transform: rotateZ(0deg)" class="custom-dropdown-arrow">
+      <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+        <path
+          d="M1 1L6 6L11 1"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+  </div>
+  <nav class="input-dropdown-list w-dropdown-list">
+    <div class="input-dropdown-card w-dyn-list">
+      <div role="list" class="grid-1-column gap-row-small w-dyn-items">
+        <% if (user) { %>
+        <!-- LOGGED IN -->
+        <div role="listitem" class="w-dyn-item">
+          <a href="/profile" class="link-2 w-inline-block"
+            ><div>My Profile</div></a
+          >
+        </div>
+        <div role="listitem" class="w-dyn-item">
+          <a href="/orders" class="link-2 w-inline-block"><div>Orders</div></a>
+        </div>
+        <div role="listitem" class="w-dyn-item">
+          <a href="#" id="logout-button" class="link-2 w-inline-block">
+            Log out
+          </a>
+        </div>
+        <% } else { %>
+        <!-- LOGGED OUT -->
+        <div role="listitem" class="w-dyn-item">
+          <a href="/login" class="link-2 w-inline-block"><div>Log In</div></a>
+        </div>
+        <div role="listitem" class="w-dyn-item">
+          <a href="/signup" class="link-2 w-inline-block"><div>Sign Up</div></a>
+        </div>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+</div>

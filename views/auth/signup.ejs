@@ -12,15 +12,8 @@
     Sign Up to
     <span class="freakum-brand">Freakum</span>
   </h2>
-  <div id="login-form-wrapper" class="form-wrapper width-320px w-form">
-    <form
-      id="signup-form"
-      name="signup-form"
-      action="/signup"
-      method="POST"
-      aria-label="Sign Up"
-      novalidate
-    >
+  <div id="login-form-wrapper" class="form-wrapper width-320px">
+    <form id="signup-form" name="signup-form" aria-label="Sign Up" novalidate>
       <!-- CSRF token -->
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
@@ -155,7 +148,7 @@
       <div class="buttons-row left mg-top-default">
         <button
           type="submit"
-          id="primary-button"
+          id="submit-button"
           class="primary-button-2 w-button"
         >
           Sign Up

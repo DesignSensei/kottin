@@ -27,10 +27,16 @@ router.get("/auth/google", passport.authenticate("google", {
   scope: ["profile", "email"]
 }));
 router.get("/auth/google/callback", passport.authenticate("google", {
-  failureRedirect: "/login?error=google",
-  failureMessage: true
-}), function (req, res) {
-  return res.redirect("/shop");
+  session: true
+}), function (req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: "Googlee authentication failed"
+    });
+  }
+
+  res.redirect("/shop");
 });
 /* ---------- Auth actions (POST) ---------- */
 

@@ -6,7 +6,6 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
-const flash = require("connect-flash");
 const passport = require("passport");
 const csurf = require("csurf");
 const expressLayouts = require("express-ejs-layouts");
@@ -54,7 +53,7 @@ app.use(cookieParser());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
-    name: "sid",
+    name: "connect.sid",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
@@ -70,27 +69,30 @@ app.use(
   })
 );
 
-/* ---------- Flash Middleware ---------- */
-app.use(flash());
-
 /* ---------- Passport Config ---------- */
 require("./config/passport")(passport);
+
 // Initialize Passport Middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
 /* ---------- CSRF Middleware ---------- */
-app.use(csurf());
+const csrfProtection = csurf();
+app.use((req, res, next) => {
+  // Skip CSRF for logout endpoint
+  if (req.path === "/logout" && req.method === "POST") {
+    return next();
+  }
+
+  // Apply CSRF to everything else
+  csrfProtection(req, res, next);
+});
 
 /* ---------- Locals available to all views ---------- */
 app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  res.locals.flash = {
-    success: req.flash("success"),
-    error: req.flash("error"),
-    info: req.flash("info"),
-    warning: req.flash("warning"),
-  };
+  res.locals.csrfToken =
+    typeof req.csrfToken === "function" ? req.csrfToken() : "";
+  res.locals.error = "Session expired or form tampered with. Please retry.";
   res.locals.user = req.user || null;
   next();
 });
@@ -114,7 +116,7 @@ app.use((err, req, res, next) => {
   // CSRF errors
   if (err.code === "EBADCSRFTOKEN") {
     res.status(403);
-    req.flash("error", "Session expired or form tampered with. Please retry.");
+    res.locals.error = "Session expired or form tampered with. Please retry.";
     return res.redirect(req.get("Referer") || "/");
   }
 

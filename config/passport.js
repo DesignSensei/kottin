@@ -47,14 +47,26 @@ module.exports = function (passport) {
         try {
           // Extract fields from Google's profile
           const googleId = profile.id;
-          const email = profile.emails?.[0]?.value || null;
+          const email =
+            profile.emails && profile.emails[0]
+              ? profile.emails[0].value
+              : null;
           const displayName = profile.displayName || "";
-          const photo = profile.photos?.[0]?.value || "";
+          const photo =
+            profile.photos && profile.photos[0] ? profile.photos[0].value : "";
 
           let user = await User.findOne({ googleId });
           if (!user) {
-            user = await User.create({ googleId, email, displayName, photo });
+            user = await User.create({
+              googleId,
+              email,
+              displayName,
+              photo,
+              firstName: displayName.split(" ")[0] || "",
+              lastName: displayName.split(" ").slice(1).join(" ") || "",
+            });
           }
+          return done(null, user);
         } catch (err) {
           return done(err);
         }

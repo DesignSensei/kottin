@@ -19,10 +19,9 @@
     </p>
   </div>
 
-  <div id="login-form-wrapper" class="form-wrapper width-320px w-form">
+  <div id="login-form-wrapper" class="form-wrapper width-320px">
     <form
       id="two-factor-form"
-      name="two-factor-form"
       action="/two-factor"
       method="POST"
       aria-label="Two-Factor VerifyS"
@@ -66,7 +65,8 @@
     <p class="paragraph-large" style="text-align: center; margin-top: 20px">
       Didn't get an email?
       <button
-        type="submit"
+        type="button"
+        id="resend-btn"
         class="primary-link"
         style="
           text-decoration: none;
@@ -77,10 +77,6 @@
           cursor: pointer;
           display: inline;
         "
-        form="two-factor-form"
-        formmethod="POST"
-        formaction="/two-factor/resend"
-        formnovalidate
       >
         Resend
       </button>
