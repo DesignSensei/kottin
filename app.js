@@ -17,7 +17,7 @@ const logger = require("./utils/logger");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
-const mainRoutes = require("./routes/mainRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 const shopRoutes = require("./routes/shopRoutes");
 
 // Connect to database
@@ -79,9 +79,8 @@ app.use(passport.session());
 /* ---------- CSRF Middleware ---------- */
 const csrfProtection = csurf();
 app.use((req, res, next) => {
-  // Skip CSRF for logout endpoint
   if (req.path === "/logout" && req.method === "POST") {
-    return next();
+    return next(); // Skip CSRF for logout endpoint
   }
 
   // Apply CSRF to everything else
@@ -98,7 +97,7 @@ app.use((req, res, next) => {
 });
 
 /* ---------- Mount Routes ---------- */
-app.use("/", mainRoutes);
+app.use("/admin", adminRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
 

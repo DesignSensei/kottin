@@ -8308,8 +8308,7 @@ fieldset:disabled .btn {
   max-height: 20px !important;
 }
 .mh-25px {
-  height: auto;
-  width: auto;
+  height: 25px !important;
 }
 .mh-30px {
   max-height: 30px !important;
@@ -8318,7 +8317,7 @@ fieldset:disabled .btn {
   max-height: 35px !important;
 }
 .mh-40px {
-  max-height: 40px !important;
+  height: 40px !important;
 }
 .mh-45px {
   max-height: 45px !important;

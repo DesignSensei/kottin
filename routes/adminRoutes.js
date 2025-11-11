@@ -1,16 +1,16 @@
-// routes/mainRoutes.js
+// routes/adminRoutes.js
 
 const express = require("express");
 const router = express.Router();
 const { ensureRole } = require("../middleware/authMiddleware");
-const mainController = require("../controllers/mainController");
+const adminController = require("../controllers/adminController");
 
 /* ---------- Public pages (GET) ---------- */
-router.get("/", mainController.showHome);
-router.get("/home", mainController.showHome);
+router.get("/", adminController.showHome);
+router.get("/home", adminController.showHome);
 
 /* ==================== ADMIN ==================== */
 /* ---------- Public pages (GET) ---------- */
-router.get("/admin/dashboard", mainController.showDashboard);
+router.get("/dashboard", adminController.showDashboard);
 
 module.exports = router;

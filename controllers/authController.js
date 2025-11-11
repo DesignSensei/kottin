@@ -350,7 +350,7 @@ exports.postResendTwoFactor = async (req, res, next) => {
 // Handle logout
 exports.postLogout = (req, res) => {
   // Passport's logout function
-  req.logout(function (error) {
+  req.logout((error) => {
     if (error) {
       logger.error("Logout Error:", error);
       return res.status(500).json({ success: false, message: "Logout failed" });

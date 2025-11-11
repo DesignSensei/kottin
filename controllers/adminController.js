@@ -1,4 +1,4 @@
-// controllers/mainController.js
+// controllers/adminController.js
 
 exports.showHome = (req, res) => {
   res.render("main/index", {
@@ -11,7 +11,7 @@ exports.showHome = (req, res) => {
 
 exports.showDashboard = (req, res) => {
   res.render("admin/dashboard", {
-    layout: "layouts/main-layout",
+    layout: "layouts/admin-layout",
     title: "Dashboard",
     pageTitle: "Dashboard",
     breadcrumbs: [

@@ -9,12 +9,6 @@
     <!--begin::Logo-->
 
     <div class="app-header-logo d-flex flex-center">
-      <!--begin::Logo image-->
-      <a href="index.html">
-        <img alt="Logo" src="/assets/images/freakum-icon.svg" class="mh-25px" />
-      </a>
-      <!--end::Logo image-->
-
       <!--begin::Sidebar toggle-->
       <button
         class="btn btn-icon btn-sm btn-active-color-primary d-flex d-lg-none"
@@ -23,6 +17,12 @@
         <i class="ki-outline ki-abstract-14 fs-1"></i>
       </button>
       <!--end::Sidebar toggle-->
+
+      <!--begin::Logo image-->
+      <a href="index.html">
+        <img alt="Logo" src="/assets/images/freakum-logo.svg" class="mh-40px" />
+      </a>
+      <!--end::Logo image-->
     </div>
     <!--end::Logo-->
 
@@ -599,73 +599,63 @@
               class="menu-item px-5"
               data-kt-menu-trigger="{default: 'click', lg: 'hover'}"
               data-kt-menu-placement="left-start"
-              data-kt-menu-offset="-15px, 0"
             >
               <a href="#" class="menu-link px-5">
-                <span class="menu-title">My Subscription</span>
-                <span class="menu-arrow"></span>
+                <span class="menu-title">Mode</span>
+                <!-- Active icon based on theme -->
+                <i class="ki-outline ki-night-day theme-light-show fs-2x"></i>
+                <i class="ki-outline ki-moon theme-dark-show fs-2x"></i>
               </a>
+
               <!--begin::Menu sub-->
-              <div class="menu-sub menu-sub-dropdown w-175px py-4">
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
-                  <a href="account/referrals.html" class="menu-link px-5"
-                    >Referrals</a
-                  >
-                </div>
-                <!--end::Menu item-->
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
-                  <a href="account/billing.html" class="menu-link px-5"
-                    >Billing</a
-                  >
-                </div>
-                <!--end::Menu item-->
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
-                  <a href="account/statements.html" class="menu-link px-5"
-                    >Payments</a
-                  >
-                </div>
-                <!--end::Menu item-->
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
+              <div
+                class="menu-sub menu-sub-dropdown w-150px py-4"
+                data-kt-element="theme-mode-menu"
+              >
+                <!-- Light Mode -->
+                <div class="menu-item px-3 my-0">
                   <a
-                    href="account/statements.html"
-                    class="menu-link d-flex flex-stack px-5"
-                    >Statements
-                    <span
-                      class="ms-2 lh-0"
-                      data-bs-toggle="tooltip"
-                      title="View your statements"
-                    >
-                      <i class="ki-outline ki-information-5 fs-5"></i> </span
-                  ></a>
+                    href="#"
+                    class="menu-link px-3 py-2"
+                    data-kt-element="mode"
+                    data-kt-value="light"
+                  >
+                    <span class="menu-icon" data-kt-element="icon">
+                      <i class="ki-outline ki-night-day fs-2"></i>
+                    </span>
+                    <span class="menu-title">Light</span>
+                  </a>
                 </div>
-                <!--end::Menu item-->
-                <!--begin::Menu separator-->
-                <div class="separator my-2"></div>
-                <!--end::Menu separator-->
-                <!--begin::Menu item-->
-                <div class="menu-item px-3">
-                  <div class="menu-content px-3">
-                    <label
-                      class="form-check form-switch form-check-custom form-check-solid"
-                    >
-                      <input
-                        class="form-check-input w-30px h-20px"
-                        type="checkbox"
-                        value="1"
-                        checked="checked"
-                        name="notifications"
-                      />
-                      <span class="form-check-label text-muted fs-7"
-                        >Notifications</span
-                      >
-                    </label>
-                  </div>
+
+                <!-- Dark Mode -->
+                <div class="menu-item px-3 my-0">
+                  <a
+                    href="#"
+                    class="menu-link px-3 py-2"
+                    data-kt-element="mode"
+                    data-kt-value="dark"
+                  >
+                    <span class="menu-icon" data-kt-element="icon">
+                      <i class="ki-outline ki-moon fs-2"></i>
+                    </span>
+                    <span class="menu-title">Dark</span>
+                  </a>
                 </div>
-                <!--end::Menu item-->
+
+                <!-- System Mode -->
+                <div class="menu-item px-3 my-0">
+                  <a
+                    href="#"
+                    class="menu-link px-3 py-2"
+                    data-kt-element="mode"
+                    data-kt-value="system"
+                  >
+                    <span class="menu-icon" data-kt-element="icon">
+                      <i class="ki-outline ki-screen fs-2"></i>
+                    </span>
+                    <span class="menu-title">System</span>
+                  </a>
+                </div>
               </div>
               <!--end::Menu sub-->
             </div>
@@ -673,11 +663,7 @@
 
             <!--begin::Menu item-->
             <div class="menu-item px-5">
-              <a
-                href="authentication/layouts/corporate/sign-in.html"
-                class="menu-link px-5"
-                >Sign Out</a
-              >
+              <a href="#" id="logout-button" class="menu-link px-5">Log Out</a>
             </div>
             <!--end::Menu item-->
           </div>
