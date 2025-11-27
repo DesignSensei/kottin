@@ -8,14 +8,13 @@ function ensureAuth(req, res, next) {
 
 // Decide "home" based on role
 function roleAssign(role) {
-  return ["admin", "super-admin"].includes(role) ? "/admin/dashboard" : "/home";
+  return ["admin", "super-admin"].includes(role) ? "/admin/dashboard" : "/shop";
 }
 
 // Only allow guests (not logged in)
 // If already logged in, push them to into the app (shop)
 function ensureGuest(req, res, next) {
-  if (req.isAuthenticated && req.isAuthenticated())
-    return res.redirect(roleAssign(req.user?.role));
+  if (req.isAuthenticated && req.isAuthenticated()) return res.redirect(roleAssign(req.user?.role));
   return next();
 }
 
@@ -23,7 +22,6 @@ function ensureGuest(req, res, next) {
 function ensurePending2FA(req, res, next) {
   if (req.session && req.session.pending2FA) return next();
 
-  req.flash?.("info", "Start by logging in.");
   return res.redirect("/login");
 }
 
@@ -38,10 +36,21 @@ function ensureRole(...roles) {
   };
 }
 
+function ensureApiRole(...roles) {
+  return (req, res, next) => {
+    if (req.isAuthenticated && req.isAuthenticated()) {
+      if (roles.includes(req.user?.role)) return next();
+      return res.status(403).send("Forbidden: Insufficient permissions");
+    }
+    return res.redirect("/login");
+  };
+}
+
 module.exports = {
   ensureAuth,
   ensureGuest,
   ensurePending2FA,
   ensureRole,
+  ensureApiRole,
   roleAssign,
 };

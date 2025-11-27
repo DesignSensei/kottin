@@ -1,4 +1,4 @@
-// public/js/login.js
+// public/js/custom/auth/login.js
 
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------- Password toggle ----------------------
@@ -14,10 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
       togglePasswordBtn.innerHTML = window.feather
         ? feather.icons[isVisible ? "eye" : "eye-off"].toSvg()
         : isVisible;
-      togglePasswordBtn.setAttribute(
-        "aria-label",
-        isVisible ? "Hide password" : "Show password"
-      );
+      togglePasswordBtn.setAttribute("aria-label", isVisible ? "Hide password" : "Show password");
     });
   }
 
@@ -37,12 +34,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const validity = field.validity;
     const customMessages = messages[field.name] || {};
 
-    if (validity.valueMissing)
-      return customMessages.valueMissing || "This field is required";
-    if (validity.typeMismatch)
-      return customMessages.typeMismatch || "Please enter a valid value";
-    if (validity.tooShort)
-      return customMessages.tooShort || `Minimum length is ${field.minLength}`;
+    if (validity.valueMissing) return customMessages.valueMissing || "This field is required";
+    if (validity.typeMismatch) return customMessages.typeMismatch || "Please enter a valid value";
+    if (validity.tooShort) return customMessages.tooShort || `Minimum length is ${field.minLength}`;
     return field.validationMessage || "Please fix this field";
   }
 

@@ -1,3 +1,5 @@
+// models/Category.js
+
 const mongoose = require("mongoose");
 
 // Tiny slugger (turns "Classic Tee" → "classic-tee")
@@ -56,6 +58,7 @@ categorySchema.pre("validate", function (next) {
 // Helpful indexes:
 // 1) Common reads: only active categories, sorted by sortOrder then name
 categorySchema.index({ active: 1, sortOrder: 1, name: 1 });
+
 // 2) For hierarchical queries (fetch children by parent quickly)
 categorySchema.index({ parent: 1, active: 1 });
 

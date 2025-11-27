@@ -1,6 +1,6 @@
-// public/js/signup.js
+// public/js/custom/auth/signup.js
 
-import { LoadingOverlay } from "./utils/loading.js";
+import { LoadingOverlay } from "../../utils/loading.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // ----------------- Form, fields, and validation messages -----------------
@@ -45,12 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function getErrorMessage(field) {
     const validity = field.validity;
     const customMessages = messages[field.name] || {};
-    if (validity.valueMissing)
-      return customMessages.valueMissing || "This field is required";
-    if (validity.typeMismatch)
-      return customMessages.typeMismatch || "Please enter a valid value";
-    if (validity.tooShort)
-      return customMessages.tooShort || `Minimum length is ${field.minLength}`;
+    if (validity.valueMissing) return customMessages.valueMissing || "This field is required";
+    if (validity.typeMismatch) return customMessages.typeMismatch || "Please enter a valid value";
+    if (validity.tooShort) return customMessages.tooShort || `Minimum length is ${field.minLength}`;
     if (field.name === "confirmPassword") {
       const password = fieldMap.password?.value || "";
       if (field.value && field.value !== password)
@@ -64,9 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getErrorContainer(inputField) {
-    const container = form.querySelector(
-      `.field-error[data-for="${inputField.name}"]`
-    );
+    const container = form.querySelector(`.field-error[data-for="${inputField.name}"]`);
     if (!container) {
       const newContainer = document.createElement("div");
       newContainer.className = "field-error";
@@ -82,10 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (wrapper && wrapper.classList.contains("inner-container")) {
         wrapper.appendChild(newContainer);
       } else {
-        inputField.parentNode.insertBefore(
-          newContainer,
-          inputField.nextSibling
-        );
+        inputField.parentNode.insertBefore(newContainer, inputField.nextSibling);
       }
 
       console.warn(`Created error container for ${inputField.name}`);
@@ -114,8 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // If we’re in Password, tell Confirm to check itself
     if (inputField.name === "password") {
       const confirmPassword = fieldMap.confirmPassword;
-      if (confirmPassword && confirmPassword.value)
-        showFieldError(confirmPassword);
+      if (confirmPassword && confirmPassword.value) showFieldError(confirmPassword);
     }
 
     if (!builtInValid || (inputField.name === "confirmPassword" && mismatch)) {
@@ -154,12 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
       visible = !visible;
       passwordInput.type = visible ? "text" : "password";
       toggleBtn.innerHTML =
-        feather?.icons[visible ? "eye" : "eye-off"]?.toSvg() ||
-        (visible ? "Hide" : "Show");
-      toggleBtn.setAttribute(
-        "aria-label",
-        visible ? "Hide password" : "Show password"
-      );
+        feather?.icons[visible ? "eye" : "eye-off"]?.toSvg() || (visible ? "Hide" : "Show");
+      toggleBtn.setAttribute("aria-label", visible ? "Hide password" : "Show password");
     });
   });
 
@@ -172,8 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (fieldMap.password && fieldMap.confirmPassword) {
     fieldMap.password.addEventListener("input", () => {
-      if (fieldMap.confirmPassword.value)
-        showFieldError(fieldMap.confirmPassword);
+      if (fieldMap.confirmPassword.value) showFieldError(fieldMap.confirmPassword);
     });
   }
 
@@ -195,9 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (invalidFields.length > 0) {
       let title = "Please fix the errors below";
 
-      const confirmField = invalidFields.find(
-        (field) => field.name === "confirmPassword"
-      );
+      const confirmField = invalidFields.find((field) => field.name === "confirmPassword");
       if (confirmField) {
         const pwd = fieldMap.password?.value || "";
         if (confirmField.value && confirmField.value !== pwd) {

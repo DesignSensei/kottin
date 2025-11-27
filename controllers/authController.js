@@ -1,6 +1,5 @@
 // controllers/authController.js
 
-const User = require("../models/User");
 const AuthService = require("../services/authService");
 const logger = require("../utils/logger");
 const passport = require("passport");
@@ -13,7 +12,7 @@ exports.getLogin = (req, res) => {
     layout: "layouts/auth-layout",
     title: "Log In",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script src="/js/login.js"></script>`,
+    scripts: `<script src="/js/custom/auth/login.js"></script>`,
   });
 };
 
@@ -23,7 +22,7 @@ exports.getSignup = (req, res) => {
     layout: "layouts/auth-layout",
     title: "Sign Up",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script type="module" src="/js/signup.js"></script>`,
+    scripts: `<script type="module" src="/js/custom/auth/signup.js"></script>`,
   });
 };
 
@@ -33,7 +32,7 @@ exports.getResetPassword = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "Reset Password",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script src="/js/reset-password.js"></script>`,
+    scripts: `<script src="/js/custom/auth/reset-password.js"></script>`,
   });
 };
 
@@ -43,7 +42,7 @@ exports.getNewPassword = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "New Password",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script src="/js/login.js"></script>`,
+    scripts: `<script src="/js/custom/auth/new-password.js"></script>`,
   });
 };
 
@@ -55,7 +54,7 @@ exports.getTwoFactor = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "Two Factor",
     wfPage: "66b93fd9c65755b8a91df18e",
-    scripts: `<script src="/js/two-factor.js"></script>`,
+    scripts: `<script src="/js/custom/auth/two-factor.js"></script>`,
   });
 };
 
@@ -73,10 +72,11 @@ exports.postSignup = async (req, res, next) => {
     });
 
     // 2FA for new accounts
-    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
-      user._id,
-      { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
-    );
+    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(user._id, {
+      ttlMs: 5 * 60 * 1000,
+      cost: 12,
+      maxAttempts: 5,
+    });
 
     if (process.env.NODE_ENV !== "production") {
       logger.info(`2FA code for ${user.email}: ${code}`);
@@ -118,10 +118,11 @@ exports.postLogin = async (req, res, next) => {
 
     if (user.twoFactorEnabled) {
       try {
-        const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
-          user._id,
-          { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
-        );
+        const { code, expiresAt } = await AuthService.createTwoFactorChallenge(user._id, {
+          ttlMs: 5 * 60 * 1000,
+          cost: 12,
+          maxAttempts: 5,
+        });
 
         // SEND EMAIL
         if (process.env.ENABLE_EMAIL === "true") {
@@ -153,8 +154,7 @@ exports.postLogin = async (req, res, next) => {
           redirect: "/two-factor",
           message: "Enter the 6-digit code we sent.",
           user: {
-            name:
-              user.displayName || user.firstName || user.email.split("@")[0],
+            name: user.displayName || user.firstName || user.email.split("@")[0],
           },
         });
       } catch (err) {
@@ -165,16 +165,12 @@ exports.postLogin = async (req, res, next) => {
     // No 2FA → normal login
     req.login(user, (err) => {
       if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Login failed" });
+        return res.status(500).json({ success: false, message: "Login failed" });
       }
       return res.json({
         success: true,
         redirect:
-          user.role === "super-admin" || user.role === "admin"
-            ? "/admin/dashboard"
-            : "/home",
+          user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home",
         message: "Welcome back!",
         user: {
           name: user.displayName || user.firstName || user.email.split("@")[0],
@@ -190,11 +186,8 @@ exports.postRequestPasswordReset = async (req, res, next) => {
     const { email } = req.body;
     const result = await AuthService.createPasswordReset({ email });
     if (result) {
-      const baseUrl =
-        process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
-      const resetUrl = `${baseUrl}/new-password?token=${encodeURIComponent(
-        result.token
-      )}`;
+      const baseUrl = process.env.APP_URL || `${req.protocol}://${req.get("host")}`;
+      const resetUrl = `${baseUrl}/new-password?token=${encodeURIComponent(result.token)}`;
       logger.info("Password reset link:", resetUrl); // dev; email/SMS in prod
     }
     return res.json({
@@ -213,14 +206,10 @@ exports.postSetNewPassword = async (req, res, next) => {
   try {
     const { token, password, confirmPassword } = req.body;
     if (!token) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Reset link is invalid or missing" });
+      return res.status(400).json({ success: false, message: "Reset link is invalid or missing" });
     }
     if (!password || password !== confirmPassword) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Passwords do not match" });
+      return res.status(400).json({ success: false, message: "Passwords do not match" });
     }
     const user = await AuthService.setNewPassword({ token, password });
     return req.login(user, (err) => {
@@ -228,9 +217,7 @@ exports.postSetNewPassword = async (req, res, next) => {
       return res.json({
         success: true,
         redirect:
-          user.role === "super-admin" || user.role === "admin"
-            ? "/admin/dashboard"
-            : "/home",
+          user.role === "super-admin" || user.role === "admin" ? "/admin/dashboard" : "/home",
         message: "Password updated. You’re now signed in.",
         user: {
           name: user.displayName || user.firstName || user.email.split("@")[0],
@@ -249,9 +236,7 @@ exports.postVerifyTwoFactor = async (req, res, next) => {
   try {
     const pending = req.session.pending2FA;
     if (!pending) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Start by logging in." });
+      return res.status(400).json({ success: false, message: "Start by logging in." });
     }
     const raw = req.body.code || "";
     const inputCode = String(raw).replace(/\D/g, "").slice(0, 6);
@@ -291,9 +276,7 @@ exports.postVerifyTwoFactor = async (req, res, next) => {
       return res.json({
         success: true,
         redirect:
-          user.role === "admin" || user.role === "super-admin"
-            ? "/admin/dashboard"
-            : "/home",
+          user.role === "admin" || user.role === "super-admin" ? "/admin/dashboard" : "/home",
         message: "2FA complete!",
         user: {
           name: user.displayName || user.firstName || user.email.split("@")[0],
@@ -316,10 +299,11 @@ exports.postResendTwoFactor = async (req, res, next) => {
       });
     }
 
-    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(
-      pending.userId,
-      { ttlMs: 5 * 60 * 1000, cost: 12, maxAttempts: 5 }
-    );
+    const { code, expiresAt } = await AuthService.createTwoFactorChallenge(pending.userId, {
+      ttlMs: 5 * 60 * 1000,
+      cost: 12,
+      maxAttempts: 5,
+    });
 
     if (process.env.ENABLE_EMAIL === "true") {
       try {

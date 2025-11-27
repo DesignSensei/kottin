@@ -1,4 +1,4 @@
-// public/js/logout.js
+// public/js/custom/auth/logout.js
 
 document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logout-button");

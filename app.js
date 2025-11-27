@@ -17,8 +17,13 @@ const logger = require("./utils/logger");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
-const adminRoutes = require("./routes/adminRoutes");
+const adminRoutes = require("./routes/admin/adminRoutes");
+const productRoutes = require("./routes/admin/productRoutes");
+// const categoryRoutes = require("./routes/categoryRoutes");
 const shopRoutes = require("./routes/shopRoutes");
+
+// API Routes
+const apiProductRoutes = require("./routes/api/productRoutes");
 
 // Connect to database
 connectDB();
@@ -89,8 +94,7 @@ app.use((req, res, next) => {
 
 /* ---------- Locals available to all views ---------- */
 app.use((req, res, next) => {
-  res.locals.csrfToken =
-    typeof req.csrfToken === "function" ? req.csrfToken() : "";
+  res.locals.csrfToken = typeof req.csrfToken === "function" ? req.csrfToken() : "";
   res.locals.error = "Session expired or form tampered with. Please retry.";
   res.locals.user = req.user || null;
   next();
@@ -98,8 +102,13 @@ app.use((req, res, next) => {
 
 /* ---------- Mount Routes ---------- */
 app.use("/admin", adminRoutes);
+app.use("/admin/products", productRoutes);
+// app.use("/admin/categories", categoryRoutes);
 app.use(authRoutes);
 app.use(shopRoutes);
+
+/* ---------- Mount API Routes ---------- */
+app.use("/admin", apiProductRoutes);
 
 /* ---------- Catch unmatched routes (404) ---------- */
 app.use((req, res) => {
@@ -131,9 +140,7 @@ app.use((err, req, res, next) => {
 
   // Log and show error page with explicit layout
   logger.error(
-    `[${statusCode}] ${req.method} ${req.originalUrl} :: ${err.message}\n${
-      err.stack || ""
-    }`
+    `[${statusCode}] ${req.method} ${req.originalUrl} :: ${err.message}\n${err.stack || ""}`
   );
 
   return res.status(statusCode).render("auth/error", {
@@ -145,6 +152,4 @@ app.use((err, req, res, next) => {
 });
 
 /* ---------- Start server ---------- */
-app.listen(PORT, () =>
-  logger.info(`Server running on http://localhost:${PORT}`)
-);
+app.listen(PORT, () => logger.info(`Server running on http://localhost:${PORT}`));

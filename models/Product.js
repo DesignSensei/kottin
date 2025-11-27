@@ -1,12 +1,21 @@
+// models/Product.js
+
 const mongoose = require("mongoose");
 
-// Tiny slugger (turns "Classic Tee" → "classic-tee")
+// Tiny slugger funvtion
 function slugify(s) {
   return String(s)
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-") // replace spaces/symbols with "-"
-    .replace(/^-+|-+$/g, ""); // trim hyphens from start/end
+    .replace(/[^a-z0-9]+/g, "-") // Replace spaces/symbols with "-"
+    .replace(/^-+|-+$/g, ""); // Trim hyphens from start/end
+}
+
+function toMoney(n) {
+  if (n == null) return n;
+  const num = Number(n);
+  if (!Number.isFinite(num) || num < 0) return undefined;
+  return Math.round(num * 100) / 100; // ensures price is two decimal points
 }
 
 const productSchema = new mongoose.Schema(
@@ -27,9 +36,16 @@ const productSchema = new mongoose.Schema(
       default: "",
     },
 
+    quantity: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+
     basePrice: {
       type: Number,
       required: true,
+      set: toMoney, // Format price before saving
     },
 
     currency: {

@@ -1,0 +1,134 @@
+<!-- views/admin/products/listing.ejs -->
+
+<!--begin::Product Overview-->
+<div class="pt-0 mb-10">
+  <div class="row">
+    <!-- Total Products -->
+    <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <div class="symbol symbol-60px mb-5">
+            <span class="symbol-label bg-primary">
+              <i class="ki-outline ki-box fs-2x text-white"></i>
+            </span>
+          </div>
+          <span class="text-gray-800 fw-bold fs-1 mb-2"><%= totalProducts %></span>
+          <span class="text-gray-600 fw-semibold fs-4">Total Products</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Published Products -->
+    <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <div class="symbol symbol-60px mb-5">
+            <span class="symbol-label bg-info">
+              <i class="ki-outline ki-check fs-2x text-white"></i>
+            </span>
+          </div>
+          <span class="text-gray-800 fw-bold fs-1 mb-2"><%= publishedProducts %></span>
+          <span class="text-gray-600 fw-semibold fs-4">Published</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Low Stock Products -->
+    <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <div class="symbol symbol-60px mb-5">
+            <span class="symbol-label bg-warning">
+              <i class="ki-outline ki-exclamation-circle fs-2x text-white"></i>
+            </span>
+          </div>
+          <span class="text-gray-800 fw-bold fs-1 mb-2"><%= lowStockProducts %></span>
+          <span class="text-gray-600 fw-semibold fs-4">Low Stock</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Out of Stock Products -->
+    <div class="col-12 col-md-6 col-lg-3 mb-5 mb-lg-0">
+      <div class="card h-100">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+          <div class="symbol symbol-60px mb-5">
+            <span class="symbol-label bg-danger">
+              <i class="ki-outline ki-cross-circle fs-2x text-white"></i>
+            </span>
+          </div>
+          <span class="text-gray-800 fw-bold fs-1 mb-2"><%= outOfStockProducts %></span>
+          <span class="text-gray-600 fw-semibold fs-4">Out of Stock</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--end::Product Overview-->
+
+<!--begin::Products-->
+<div class="card card-flush">
+  <!--begin::Card header-->
+  <div class="card-header align-items-center py-5 gap-2 gap-md-5">
+    <div class="card-title">
+      <!--begin::Search-->
+      <div class="d-flex align-items-center position-relative my-1">
+        <i class="ki-outline ki-magnifier fs-3 position-absolute ms-4"></i>
+        <input
+          type="text"
+          id="searchProduct"
+          class="form-control form-control-solid w-250px ps-12"
+          placeholder="Search Product"
+        />
+      </div>
+      <!--end::Search-->
+    </div>
+
+    <div class="card-toolbar flex-row-fluid justify-content-end gap-5">
+      <div class="w-100 mw-150px">
+        <!--begin:: Status-->
+        <select
+          class="form-select form-select-solid"
+          id="statusFilter"
+          data-control="select2"
+          data-hide-search="true"
+          data-placeholder="Select status"
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <!--end:: Status-->
+      </div>
+      <a href="/admin/products/new" class="btn btn-primary">Add Product</a>
+    </div>
+  </div>
+  <!--end::Card header-->
+
+  <!--begin::Card body-->
+  <div class="card-body pt-0">
+    <div class="table-responsive">
+      <table class="table align-middle table-row-dashed fs-6 gy-5 text-center" id="productTable">
+        <thead>
+          <tr class="text-start text-gray-500 fw-bold fs-7 text-uppercase gs-0 align-middle">
+            <th class="w-10px pe-2">
+              <div class="form-check form-check-sm form-check-custom form-check-solid me-3">
+                <input class="form-check-input" type="checkbox" id="selectAll" />
+              </div>
+            </th>
+            <th class="min-w-150px text-hover-primary">Product</th>
+            <th class="text-start min-w-150px text-hover-primary">Categories</th>
+            <th class="text-start min-w-70px text-hover-primary">Qty</th>
+            <th class="text-start min-w-100px text-hover-primary">Price</th>
+            <th class="text-start min-w-70px text-hover-primary">Status</th>
+            <th class="text-start min-w-70px">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody class="fw-semibold text-gray-600" id="productTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!--end::Card body-->
+</div>
+<!--end::Products-->

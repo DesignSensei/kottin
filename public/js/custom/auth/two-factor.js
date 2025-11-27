@@ -1,4 +1,4 @@
-// public/js/two-factor.js
+// public/js/custom/auth/two-factor.js
 
 document.addEventListener("DOMContentLoaded", () => {
   const inputs = Array.from(document.querySelectorAll(".otp-input"));

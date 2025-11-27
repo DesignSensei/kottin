@@ -40,5 +40,8 @@ exports.showDashboard = (req, res) => {
     <script src="/assets/js/custom/utilities/modals/users-search.js"></script>
     <!--end::Custom Javascript-->
     `,
+    showActivitiesDrawer: false,
+    showChatDrawer1: false,
+    showChatDrawer2: false,
   });
 };
