@@ -4,12 +4,12 @@
 <form
   id="kt_ecommerce_add_product_form"
   class="form d-flex flex-column flex-lg-row"
-  data-kt-redirect="apps/ecommerce/catalog/products.html"
+  action="/admin/products"
+  method="POST"
+  enctype="multipart/form-data"
 >
   <!--begin::Aside column-->
-  <div
-    class="d-flex flex-column gap-7 gap-lg-10 w-100 w-lg-300px mb-7 me-lg-10"
-  >
+  <div class="d-flex flex-column gap-7 gap-lg-10 w-100 w-lg-300px mb-7 me-lg-10">
     <!--begin::Thumbnail settings-->
     <div class="card card-flush py-4">
       <!--begin::Card header-->
@@ -27,10 +27,10 @@
         <!--begin::Image input placeholder-->
         <style>
           .image-input-placeholder {
-            background-image: url("assets/media/svg/files/blank-image.svg");
+            background-image: url("/assets/media/svg/files/blank-image.svg");
           }
           [data-bs-theme="dark"] .image-input-placeholder {
-            background-image: url("assets/media/svg/files/blank-image-dark.svg");
+            background-image: url("/assets/media/svg/files/blank-image-dark.svg");
           }
         </style>
         <!--end::Image input placeholder-->
@@ -79,8 +79,7 @@
         <!--end::Image input-->
         <!--begin::Description-->
         <div class="text-muted fs-7">
-          Set the product thumbnail image. Only *.png, *.jpg and *.jpeg image
-          files are accepted
+          Set the product thumbnail image. Only *.png, *.jpg and *.jpeg image files are accepted
         </div>
         <!--end::Description-->
       </div>
@@ -117,10 +116,9 @@
           id="kt_ecommerce_add_product_status_select"
         >
           <option></option>
-          <option value="published" selected="selected">Published</option>
-          <option value="draft">Draft</option>
-          <option value="scheduled">Scheduled</option>
+          <option value="active" selected="selected">Active</option>
           <option value="inactive">Inactive</option>
+          <option value="draft">Draft</option>
         </select>
         <!--end::Select2-->
         <!--begin::Description-->
@@ -128,9 +126,7 @@
         <!--end::Description-->
         <!--begin::Datepicker-->
         <div class="d-none mt-10">
-          <label
-            for="kt_ecommerce_add_product_status_datepicker"
-            class="form-label"
+          <label for="kt_ecommerce_add_product_status_datepicker" class="form-label"
             >Select publishing date and time</label
           >
           <input
@@ -214,108 +210,15 @@
       <!--end::Card body-->
     </div>
     <!--end::Category & tags-->
-    <!--begin::Weekly sales-->
-    <div class="card card-flush py-4">
-      <!--begin::Card header-->
-      <div class="card-header">
-        <!--begin::Card title-->
-        <div class="card-title">
-          <h2>Weekly Sales</h2>
-        </div>
-        <!--end::Card title-->
-      </div>
-      <!--end::Card header-->
-      <!--begin::Card body-->
-      <div class="card-body pt-0">
-        <span class="text-muted"
-          >No data available. Sales data will begin capturing once product has
-          been published.</span
-        >
-      </div>
-      <!--end::Card body-->
-    </div>
-    <!--end::Weekly sales-->
-    <!--begin::Template settings-->
-    <div class="card card-flush py-4">
-      <!--begin::Card header-->
-      <div class="card-header">
-        <!--begin::Card title-->
-        <div class="card-title">
-          <h2>Product Template</h2>
-        </div>
-        <!--end::Card title-->
-      </div>
-      <!--end::Card header-->
-      <!--begin::Card body-->
-      <div class="card-body pt-0">
-        <!--begin::Select store template-->
-        <label for="kt_ecommerce_add_product_store_template" class="form-label"
-          >Select a product template</label
-        >
-        <!--end::Select store template-->
-        <!--begin::Select2-->
-        <select
-          class="form-select mb-2"
-          data-control="select2"
-          data-hide-search="true"
-          data-placeholder="Select an option"
-          id="kt_ecommerce_add_product_store_template"
-        >
-          <option></option>
-          <option value="default" selected="selected">Default template</option>
-          <option value="electronics">Electronics</option>
-          <option value="office">Office stationary</option>
-          <option value="fashion">Fashion</option>
-        </select>
-        <!--end::Select2-->
-        <!--begin::Description-->
-        <div class="text-muted fs-7">
-          Assign a template from your current theme to define how a single
-          product is displayed.
-        </div>
-        <!--end::Description-->
-      </div>
-      <!--end::Card body-->
-    </div>
-    <!--end::Template settings-->
   </div>
   <!--end::Aside column-->
+
   <!--begin::Main column-->
   <div class="d-flex flex-column flex-row-fluid gap-7 gap-lg-10">
-    <!--begin:::Tabs-->
-    <ul
-      class="nav nav-custom nav-tabs nav-line-tabs nav-line-tabs-2x border-0 fs-4 fw-semibold mb-n2"
-    >
-      <!--begin:::Tab item-->
-      <li class="nav-item">
-        <a
-          class="nav-link text-active-primary pb-4 active"
-          data-bs-toggle="tab"
-          href="#kt_ecommerce_add_product_general"
-          >General</a
-        >
-      </li>
-      <!--end:::Tab item-->
-      <!--begin:::Tab item-->
-      <li class="nav-item">
-        <a
-          class="nav-link text-active-primary pb-4"
-          data-bs-toggle="tab"
-          href="#kt_ecommerce_add_product_advanced"
-          >Advanced</a
-        >
-      </li>
-      <!--end:::Tab item-->
-    </ul>
-    <!--end:::Tabs-->
     <!--begin::Tab content-->
     <div class="tab-content">
       <!--begin::Tab pane-->
-      <div
-        class="tab-pane fade show active"
-        id="kt_ecommerce_add_product_general"
-        role="tab-panel"
-      >
+      <div class="tab-pane fade show active" id="kt_ecommerce_add_product_general" role="tab-panel">
         <div class="d-flex flex-column gap-7 gap-lg-10">
           <!--begin::General options-->
           <div class="card card-flush py-4">
@@ -333,6 +236,7 @@
                 <!--begin::Label-->
                 <label class="required form-label">Product Name</label>
                 <!--end::Label-->
+
                 <!--begin::Input-->
                 <input
                   type="text"
@@ -342,6 +246,7 @@
                   value=""
                 />
                 <!--end::Input-->
+
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
                   A product name is required and recommended to be unique.
@@ -349,6 +254,7 @@
                 <!--end::Description-->
               </div>
               <!--end::Input group-->
+
               <!--begin::Input group-->
               <div>
                 <!--begin::Label-->
@@ -361,6 +267,7 @@
                   class="min-h-200px mb-2"
                 ></div>
                 <!--end::Editor-->
+
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
                   Set a description to the product for better visibility.
@@ -372,6 +279,172 @@
             <!--end::Card header-->
           </div>
           <!--end::General options-->
+
+          <!--begin::Variations-->
+          <div class="card card-flush py-4">
+            <!--begin::Card header-->
+            <div class="card-header">
+              <div class="card-title">
+                <h2>Product Specifications</h2>
+              </div>
+            </div>
+            <!--end::Card header-->
+            <!--begin::Card body-->
+            <div class="card-body pt-0">
+              <!--begin::Input group-->
+              <div data-kt-ecommerce-catalog-add-product="auto-options">
+                <!--begin::Label-->
+                <label class="form-label">Add Product Variations</label>
+                <!--end::Label-->
+                <!--begin::Repeater-->
+                <div id="kt_ecommerce_add_product_options">
+                  <!--begin::Form group-->
+                  <div class="form-group">
+                    <div
+                      data-repeater-list="kt_ecommerce_add_product_options"
+                      class="d-flex flex-column gap-3"
+                    >
+                      <div
+                        data-repeater-item=""
+                        class="form-group d-flex flex-wrap align-items-center gap-5"
+                      >
+                        <!--begin::Select2-->
+                        <div class="w-100 w-md-200px">
+                          <select
+                            class="form-select"
+                            name="kt_ecommerce_add_product_options[0][product_option]"
+                            data-kt-ecommerce-catalog-add-product="product_option"
+                            data-placeholder="Select a variation"
+                          >
+                            <option></option>
+                            <option value="color">Color</option>
+                            <option value="size">Size</option>
+                            <option value="material">Material</option>
+                            <option value="style">Style</option>
+                          </select>
+                        </div>
+                        <!--end::Select2-->
+                        <!--begin::Input-->
+                        <input
+                          type="text"
+                          class="form-control mw-100 w-200px"
+                          name="kt_ecommerce_add_product_options[0][product_option_value]"
+                          placeholder="Variation"
+                        />
+                        <!--end::Input-->
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-icon btn-light-danger delete-variation"
+                        >
+                          <i class="ki-outline ki-cross fs-1"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!--end::Form group-->
+                  <!--begin::Form group-->
+                  <div class="form-group mt-5">
+                    <button type="button" id="add-variation" class="btn btn-sm btn-light-primary">
+                      <i class="ki-outline ki-plus fs-2"></i>Add another variation
+                    </button>
+                  </div>
+                  <!--end::Form group-->
+                </div>
+                <!--end::Repeater-->
+              </div>
+              <!--end::Input group-->
+            </div>
+            <!--end::Card body-->
+
+            <!--begin::Card body-->
+            <div class="card-body pt-0">
+              <!--begin::Input group-->
+              <div class="mb-10 fv-row">
+                <!--begin::Label-->
+                <label class="required form-label">SKU</label>
+                <!--end::Label-->
+                <!--begin::Input-->
+                <input
+                  type="text"
+                  name="sku"
+                  class="form-control mb-2"
+                  placeholder="SKU Number"
+                  value=""
+                />
+                <!--end::Input-->
+                <!--begin::Description-->
+                <div class="text-muted fs-7">Enter the product SKU.</div>
+                <!--end::Description-->
+              </div>
+              <!--end::Input group-->
+              <!--begin::Input group-->
+              <div class="mb-10 fv-row">
+                <!--begin::Label-->
+                <label class="required form-label">Stock Quantity</label>
+                <!--end::Label-->
+                <!--begin::Input-->
+                <div class="d-flex gap-3">
+                  <input
+                    type="number"
+                    name="shelf"
+                    class="form-control mb-2"
+                    placeholder="On shelf"
+                    value=""
+                  />
+                </div>
+                <!--end::Input-->
+                <!--begin::Description-->
+                <div class="text-muted fs-7">Enter the product quantity.</div>
+                <!--end::Description-->
+              </div>
+              <!--end::Input group-->
+              <!--begin::Input group-->
+              <div class="fv-row">
+                <!--begin::Label-->
+                <label class="form-label">Features</label>
+                <!--end::Label-->
+                <!--begin::Input-->
+                <div class="form-check form-check-custom form-check-solid mb-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                  <label class="form-check-label">Waterproof</label>
+                </div>
+                <div class="form-check form-check-custom form-check-solid mb-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                  <label class="form-check-label">Rechargeable</label>
+                </div>
+                <div class="form-check form-check-custom form-check-solid mb-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                  <label class="form-check-label">App Controlled</label>
+                </div>
+                <div class="form-check form-check-custom form-check-solid mb-2">
+                  <input class="form-check-input" type="checkbox" value="" />
+                  <label class="form-check-label">Remote Controlled</label>
+                </div>
+                <!--end::Input-->
+                <!--begin::Description-->
+                <div class="text-muted fs-7">
+                  Allow customers to purchase products that are out of stock.
+                </div>
+                <!--end::Description-->
+              </div>
+              <!--end::Input group-->
+            </div>
+            <!--end::Card header-->
+          </div>
+          <!--end::Variations-->
+
+          <!--begin::Inventory-->
+          <div class="card card-flush py-4">
+            <!--begin::Card header-->
+            <div class="card-header">
+              <div class="card-title">
+                <h2>Inventory</h2>
+              </div>
+            </div>
+            <!--end::Card header-->
+          </div>
+          <!--end::Inventory-->
+
           <!--begin::Media-->
           <div class="card card-flush py-4">
             <!--begin::Card header-->
@@ -397,9 +470,7 @@
                       <h3 class="fs-5 fw-bold text-gray-900 mb-1">
                         Drop files here or click to upload.
                       </h3>
-                      <span class="fs-7 fw-semibold text-gray-500"
-                        >Upload up to 10 files</span
-                      >
+                      <span class="fs-7 fw-semibold text-gray-500">Upload up to 10 files</span>
                     </div>
                     <!--end::Info-->
                   </div>
@@ -454,9 +525,7 @@
                     data-bs-toggle="tooltip"
                     title="Select a discount type that will be applied to this product"
                   >
-                    <i
-                      class="ki-outline ki-information-5 text-gray-500 fs-6"
-                    ></i> </span
+                    <i class="ki-outline ki-information-5 text-gray-500 fs-6"></i> </span
                 ></label>
                 <!--End::Label-->
                 <!--begin::Row-->
@@ -487,9 +556,7 @@
                       <!--end::Radio-->
                       <!--begin::Info-->
                       <span class="ms-5">
-                        <span class="fs-4 fw-bold text-gray-800 d-block"
-                          >No Discount</span
-                        >
+                        <span class="fs-4 fw-bold text-gray-800 d-block">No Discount</span>
                       </span>
                       <!--end::Info-->
                     </label>
@@ -517,9 +584,7 @@
                       <!--end::Radio-->
                       <!--begin::Info-->
                       <span class="ms-5">
-                        <span class="fs-4 fw-bold text-gray-800 d-block"
-                          >Percentage %</span
-                        >
+                        <span class="fs-4 fw-bold text-gray-800 d-block">Percentage %</span>
                       </span>
                       <!--end::Info-->
                     </label>
@@ -547,9 +612,7 @@
                       <!--end::Radio-->
                       <!--begin::Info-->
                       <span class="ms-5">
-                        <span class="fs-4 fw-bold text-gray-800 d-block"
-                          >Fixed Price</span
-                        >
+                        <span class="fs-4 fw-bold text-gray-800 d-block">Fixed Price</span>
                       </span>
                       <!--end::Info-->
                     </label>
@@ -561,29 +624,19 @@
               </div>
               <!--end::Input group-->
               <!--begin::Input group-->
-              <div
-                class="d-none mb-10 fv-row"
-                id="kt_ecommerce_add_product_discount_percentage"
-              >
+              <div class="d-none mb-10 fv-row" id="kt_ecommerce_add_product_discount_percentage">
                 <!--begin::Label-->
                 <label class="form-label">Set Discount Percentage</label>
                 <!--end::Label-->
                 <!--begin::Slider-->
                 <div class="d-flex flex-column text-center mb-5">
-                  <div
-                    class="d-flex align-items-start justify-content-center mb-7"
-                  >
-                    <span
-                      class="fw-bold fs-3x"
-                      id="kt_ecommerce_add_product_discount_label"
+                  <div class="d-flex align-items-start justify-content-center mb-7">
+                    <span class="fw-bold fs-3x" id="kt_ecommerce_add_product_discount_label"
                       >0</span
                     >
                     <span class="fw-bold fs-4 mt-1 ms-2">%</span>
                   </div>
-                  <div
-                    id="kt_ecommerce_add_product_discount_slider"
-                    class="noUi-sm"
-                  ></div>
+                  <div id="kt_ecommerce_add_product_discount_slider" class="noUi-sm"></div>
                 </div>
                 <!--end::Slider-->
                 <!--begin::Description-->
@@ -594,10 +647,7 @@
               </div>
               <!--end::Input group-->
               <!--begin::Input group-->
-              <div
-                class="d-none mb-10 fv-row"
-                id="kt_ecommerce_add_product_discount_fixed"
-              >
+              <div class="d-none mb-10 fv-row" id="kt_ecommerce_add_product_discount_fixed">
                 <!--begin::Label-->
                 <label class="form-label">Fixed Discounted Price</label>
                 <!--end::Label-->
@@ -611,8 +661,8 @@
                 <!--end::Input-->
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
-                  Set the discounted product price. The product will be reduced
-                  at the determined fixed price
+                  Set the discounted product price. The product will be reduced at the determined
+                  fixed price
                 </div>
                 <!--end::Description-->
               </div>
@@ -665,199 +715,11 @@
         </div>
       </div>
       <!--end::Tab pane-->
+
+      <!-- ARGH -->
       <!--begin::Tab pane-->
-      <div
-        class="tab-pane fade"
-        id="kt_ecommerce_add_product_advanced"
-        role="tab-panel"
-      >
+      <div class="tab-pane fade" id="kt_ecommerce_add_product_advanced" role="tab-panel">
         <div class="d-flex flex-column gap-7 gap-lg-10">
-          <!--begin::Inventory-->
-          <div class="card card-flush py-4">
-            <!--begin::Card header-->
-            <div class="card-header">
-              <div class="card-title">
-                <h2>Inventory</h2>
-              </div>
-            </div>
-            <!--end::Card header-->
-            <!--begin::Card body-->
-            <div class="card-body pt-0">
-              <!--begin::Input group-->
-              <div class="mb-10 fv-row">
-                <!--begin::Label-->
-                <label class="required form-label">SKU</label>
-                <!--end::Label-->
-                <!--begin::Input-->
-                <input
-                  type="text"
-                  name="sku"
-                  class="form-control mb-2"
-                  placeholder="SKU Number"
-                  value=""
-                />
-                <!--end::Input-->
-                <!--begin::Description-->
-                <div class="text-muted fs-7">Enter the product SKU.</div>
-                <!--end::Description-->
-              </div>
-              <!--end::Input group-->
-              <!--begin::Input group-->
-              <div class="mb-10 fv-row">
-                <!--begin::Label-->
-                <label class="required form-label">Barcode</label>
-                <!--end::Label-->
-                <!--begin::Input-->
-                <input
-                  type="text"
-                  name="barcode"
-                  class="form-control mb-2"
-                  placeholder="Barcode Number"
-                  value=""
-                />
-                <!--end::Input-->
-                <!--begin::Description-->
-                <div class="text-muted fs-7">
-                  Enter the product barcode number.
-                </div>
-                <!--end::Description-->
-              </div>
-              <!--end::Input group-->
-              <!--begin::Input group-->
-              <div class="mb-10 fv-row">
-                <!--begin::Label-->
-                <label class="required form-label">Quantity</label>
-                <!--end::Label-->
-                <!--begin::Input-->
-                <div class="d-flex gap-3">
-                  <input
-                    type="number"
-                    name="shelf"
-                    class="form-control mb-2"
-                    placeholder="On shelf"
-                    value=""
-                  />
-                  <input
-                    type="number"
-                    name="warehouse"
-                    class="form-control mb-2"
-                    placeholder="In warehouse"
-                  />
-                </div>
-                <!--end::Input-->
-                <!--begin::Description-->
-                <div class="text-muted fs-7">Enter the product quantity.</div>
-                <!--end::Description-->
-              </div>
-              <!--end::Input group-->
-              <!--begin::Input group-->
-              <div class="fv-row">
-                <!--begin::Label-->
-                <label class="form-label">Allow Backorders</label>
-                <!--end::Label-->
-                <!--begin::Input-->
-                <div class="form-check form-check-custom form-check-solid mb-2">
-                  <input class="form-check-input" type="checkbox" value="" />
-                  <label class="form-check-label">Yes</label>
-                </div>
-                <!--end::Input-->
-                <!--begin::Description-->
-                <div class="text-muted fs-7">
-                  Allow customers to purchase products that are out of stock.
-                </div>
-                <!--end::Description-->
-              </div>
-              <!--end::Input group-->
-            </div>
-            <!--end::Card header-->
-          </div>
-          <!--end::Inventory-->
-          <!--begin::Variations-->
-          <div class="card card-flush py-4">
-            <!--begin::Card header-->
-            <div class="card-header">
-              <div class="card-title">
-                <h2>Variations</h2>
-              </div>
-            </div>
-            <!--end::Card header-->
-            <!--begin::Card body-->
-            <div class="card-body pt-0">
-              <!--begin::Input group-->
-              <div
-                class=""
-                data-kt-ecommerce-catalog-add-product="auto-options"
-              >
-                <!--begin::Label-->
-                <label class="form-label">Add Product Variations</label>
-                <!--end::Label-->
-                <!--begin::Repeater-->
-                <div id="kt_ecommerce_add_product_options">
-                  <!--begin::Form group-->
-                  <div class="form-group">
-                    <div
-                      data-repeater-list="kt_ecommerce_add_product_options"
-                      class="d-flex flex-column gap-3"
-                    >
-                      <div
-                        data-repeater-item=""
-                        class="form-group d-flex flex-wrap align-items-center gap-5"
-                      >
-                        <!--begin::Select2-->
-                        <div class="w-100 w-md-200px">
-                          <select
-                            class="form-select"
-                            name="product_option"
-                            data-placeholder="Select a variation"
-                            data-kt-ecommerce-catalog-add-product="product_option"
-                          >
-                            <option></option>
-                            <option value="color">Color</option>
-                            <option value="size">Size</option>
-                            <option value="material">Material</option>
-                            <option value="style">Style</option>
-                          </select>
-                        </div>
-                        <!--end::Select2-->
-                        <!--begin::Input-->
-                        <input
-                          type="text"
-                          class="form-control mw-100 w-200px"
-                          name="product_option_value"
-                          placeholder="Variation"
-                        />
-                        <!--end::Input-->
-                        <button
-                          type="button"
-                          data-repeater-delete=""
-                          class="btn btn-sm btn-icon btn-light-danger"
-                        >
-                          <i class="ki-outline ki-cross fs-1"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <!--end::Form group-->
-                  <!--begin::Form group-->
-                  <div class="form-group mt-5">
-                    <button
-                      type="button"
-                      data-repeater-create=""
-                      class="btn btn-sm btn-light-primary"
-                    >
-                      <i class="ki-outline ki-plus fs-2"></i>Add another
-                      variation
-                    </button>
-                  </div>
-                  <!--end::Form group-->
-                </div>
-                <!--end::Repeater-->
-              </div>
-              <!--end::Input group-->
-            </div>
-            <!--end::Card header-->
-          </div>
-          <!--end::Variations-->
           <!--begin::Shipping-->
           <div class="card card-flush py-4">
             <!--begin::Card header-->
@@ -879,15 +741,13 @@
                     id="kt_ecommerce_add_product_shipping_checkbox"
                     value="1"
                   />
-                  <label class="form-check-label"
-                    >This is a physical product</label
-                  >
+                  <label class="form-check-label">This is a physical product</label>
                 </div>
                 <!--end::Input-->
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
-                  Set if the product is a physical or digital item. Physical
-                  products may require shipping.
+                  Set if the product is a physical or digital item. Physical products may require
+                  shipping.
                 </div>
                 <!--end::Description-->
               </div>
@@ -909,9 +769,7 @@
                   />
                   <!--end::Editor-->
                   <!--begin::Description-->
-                  <div class="text-muted fs-7">
-                    Set a product weight in kilograms (kg).
-                  </div>
+                  <div class="text-muted fs-7">Set a product weight in kilograms (kg).</div>
                   <!--end::Description-->
                 </div>
                 <!--end::Input group-->
@@ -984,8 +842,7 @@
                 <!--end::Input-->
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
-                  Set a meta tag title. Recommended to be simple and precise
-                  keywords.
+                  Set a meta tag title. Recommended to be simple and precise keywords.
                 </div>
                 <!--end::Description-->
               </div>
@@ -1004,8 +861,7 @@
                 <!--end::Editor-->
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
-                  Set a meta tag description to the product for increased SEO
-                  ranking.
+                  Set a meta tag description to the product for increased SEO ranking.
                 </div>
                 <!--end::Description-->
               </div>
@@ -1024,9 +880,8 @@
                 <!--end::Editor-->
                 <!--begin::Description-->
                 <div class="text-muted fs-7">
-                  Set a list of keywords that the product is related to.
-                  Separate the keywords by adding a comma <code>,</code>between
-                  each keyword.
+                  Set a list of keywords that the product is related to. Separate the keywords by
+                  adding a comma <code>,</code>between each keyword.
                 </div>
                 <!--end::Description-->
               </div>
@@ -1050,17 +905,10 @@
       >
       <!--end::Button-->
       <!--begin::Button-->
-      <button
-        type="submit"
-        id="kt_ecommerce_add_product_submit"
-        class="btn btn-primary"
-      >
+      <button type="submit" id="kt_ecommerce_add_product_submit" class="btn btn-primary">
         <span class="indicator-label">Save Changes</span>
         <span class="indicator-progress"
-          >Please wait...
-          <span
-            class="spinner-border spinner-border-sm align-middle ms-2"
-          ></span
+          >Please wait... <span class="spinner-border spinner-border-sm align-middle ms-2"></span
         ></span>
       </button>
       <!--end::Button-->

@@ -17,6 +17,7 @@ const categorySchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique: true,
       trim: true,
     },
 
@@ -25,6 +26,7 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
       trim: true,
     },
 
@@ -36,12 +38,17 @@ const categorySchema = new mongoose.Schema(
       default: null,
     },
 
+    description: {
+      type: String,
+      default: "",
+    },
+
     sortOrder: {
       type: Number,
       default: 0,
     },
 
-    active: {
+    isActive: {
       type: Boolean,
       default: true,
     },
@@ -55,11 +62,76 @@ categorySchema.pre("validate", function (next) {
   next();
 });
 
-// Helpful indexes:
-// 1) Common reads: only active categories, sorted by sortOrder then name
-categorySchema.index({ active: 1, sortOrder: 1, name: 1 });
+// Check if this is a parent category
+categorySchema.virtual("isParent").get(function () {
+  return this.parent === null;
+});
 
-// 2) For hierarchical queries (fetch children by parent quickly)
-categorySchema.index({ parent: 1, active: 1 });
+// Get all direct children of this category
+categorySchema.methods.getChildren = async function () {
+  return await this.model("Category")
+    .find({ parent: this._id, isActive: true })
+    .sort("sortOrder name");
+};
+
+// Get full path of Category
+categorySchema.methods.getPath = async function () {
+  const path = [this.name];
+  let current = this;
+
+  while (current.path) {
+    current = await this.model("Category").findById(current.parent);
+    if (current) path.unshift(current.name);
+  }
+
+  return path;
+};
+
+// Get all parent categories
+categorySchema.statics.getParents = async function () {
+  return await this.find({ parent: null, isActive: true }).sort("sortOrder name");
+};
+
+// Get full category tree (parents with nested children)
+categorySchema.statics.getCategoryTree = async function () {
+  const parents = await this.find({ parent: null, isActive: true }).sort("sortOrder name");
+  const tree = [];
+
+  for (let parent of parents) {
+    const children = await this.find({
+      parent: parent._id,
+      isActive: true,
+    }).sort("sortOrder name");
+
+    tree.push({
+      _id: parent._id,
+      name: parent.name,
+      slug: parent.slug,
+      description: parent.description,
+      sortOrder: parent.sortOrder,
+      children: children.map((child) => ({
+        _id: child._id,
+        name: child.name,
+        slug: child.slug,
+        description: child.description,
+        sortOrder: child.sortOrder,
+      })),
+    });
+  }
+
+  return tree;
+};
+
+// Get children by parent ID
+categorySchema.statics.getChildrenOf = async function (parentId) {
+  return await this.find({
+    parent: parentId,
+    isActive: true,
+  }).sort("sortOrder name");
+};
+
+// Helpful indexes
+categorySchema.index({ isActive: 1, sortOrder: 1, name: 1 });
+categorySchema.index({ parent: 1, isActive: 1 });
 
 module.exports = mongoose.model("Category", categorySchema);

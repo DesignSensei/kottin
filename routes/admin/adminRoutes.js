@@ -13,4 +13,6 @@ router.get("/home", adminController.showHome);
 /* ---------- Public pages (GET) ---------- */
 router.get("/dashboard", ensureRole("admin", "super-admin"), adminController.showDashboard);
 
+router.get("/favicon.ico", (req, res) => res.status(204).end());
+
 module.exports = router;

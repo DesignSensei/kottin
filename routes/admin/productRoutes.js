@@ -11,7 +11,7 @@ const productController = require("../../controllers/admin/productController");
 router.get("/", productController.listProduct);
 
 // Show form to add new product → GET /admin/products/new
-// router.get("/new", productController.addProduct);
+router.get("/new", productController.addProduct);
 
 // Show form to edit product → GET /admin/products/:id/edit
 // router.get("/:id/edit", productController.editProduct);

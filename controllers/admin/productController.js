@@ -1,4 +1,4 @@
-// controllers/productController.js
+// controllers/admin/productController.js
 
 const ProductService = require("../../services/productService");
 const logger = require("../../utils/logger");
@@ -41,4 +41,19 @@ exports.listProduct = async (req, res) => {
       error: "Unable to retrieve products. Please try again later.",
     });
   }
+};
+
+// Render Add Product Form
+exports.addProduct = (req, res) => {
+  res.render("admin/products/new", {
+    layout: "layouts/admin-layout",
+    title: "Add New Product",
+    pageTitle: "Add New Product",
+    breadcrumbs: [
+      { name: "Home", url: "/" },
+      { name: "Products", url: "/admin/products" },
+      { name: "Add New", url: null },
+    ],
+    scripts: `<script src="/js/custom/products/new.js"></script>`,
+  });
 };

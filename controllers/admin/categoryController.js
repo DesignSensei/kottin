@@ -1,1 +1,1 @@
-// controllers/categoryController.js
+// controllers/admin/categoryController.js

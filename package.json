@@ -4,22 +4,22 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node -r @babel/register app.js",
-    "dev": "nodemon -r @babel/register app.js"
+    "start": "node app.js",
+    "dev": "nodemon node app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "axios": "^1.12.0",
-    "bcryptjs": "^3.0.2",
-    "bootstrap": "^5.3.7",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
     "connect-flash": "^0.1.1",
-    "connect-mongo": "^5.1.0",
+    "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
-    "csurf": "^1.11.0",
-    "dotenv": "^17.2.0",
+    "csurf": "^1.2.2",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -27,23 +27,20 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
-    "geoip-country": "^5.0.202507112343",
+    "geoip-country": "^5.0.202511282342",
     "mongo-store": "^0.0.2",
-    "mongoose": "^8.16.2",
+    "mongoose": "^9.0.0",
     "nodemailer": "^7.0.5",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.28.3",
-    "@babel/core": "^7.28.5",
     "@babel/plugin-proposal-optional-chaining": "^7.21.0",
     "@babel/plugin-transform-optional-chaining": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
-    "@babel/register": "^7.28.3",
-    "nodemon": "^3.1.10",
+    "nodemon": "^3.1.11",
     "prettier-plugin-ejs": "^1.0.3"
   }
 }

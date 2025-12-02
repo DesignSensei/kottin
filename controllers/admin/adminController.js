@@ -1,4 +1,4 @@
-// controllers/adminController.js
+// controllers/admin/adminController.js
 
 exports.showHome = (req, res) => {
   res.render("main/index", {
