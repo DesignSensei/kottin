@@ -28,15 +28,26 @@ document.addEventListener("DOMContentLoaded", () => {
     e.stopPropagation();
 
     try {
-      await fetch("/logout", {
+      const response = await fetch("/logout", {
         method: "POST",
         credentials: "include",
       });
+
+      const result = await response.json();
+
+      // Check if logout was successful
+      if (result.success) {
+        // Redirect based on role
+        if (result.role === "super-admin" || result.role === "admin") {
+          window.location.replace("/login");
+        } else {
+          window.location.replace("/shop");
+        }
+      } else {
+        console.error("Logout failed:", result.message);
+      }
     } catch (err) {
       console.error("Logout error:", err);
     }
-
-    // Always redirect to /shop after logout attempt
-    window.location.replace("/home");
   });
 });

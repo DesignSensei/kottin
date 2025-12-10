@@ -12,6 +12,7 @@ exports.getLogin = (req, res) => {
     layout: "layouts/auth-layout",
     title: "Log In",
     wfPage: "66b93fd9c65755b8a91df18e",
+    csrfToken: req.csrfToken(),
     scripts: `<script src="/js/custom/auth/login.js"></script>`,
   });
 };
@@ -22,6 +23,7 @@ exports.getSignup = (req, res) => {
     layout: "layouts/auth-layout",
     title: "Sign Up",
     wfPage: "66b93fd9c65755b8a91df18e",
+    csrfToken: req.csrfToken(),
     scripts: `<script type="module" src="/js/custom/auth/signup.js"></script>`,
   });
 };
@@ -32,6 +34,7 @@ exports.getResetPassword = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "Reset Password",
     wfPage: "66b93fd9c65755b8a91df18e",
+    csrfToken: req.csrfToken(),
     scripts: `<script src="/js/custom/auth/reset-password.js"></script>`,
   });
 };
@@ -42,6 +45,7 @@ exports.getNewPassword = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "New Password",
     wfPage: "66b93fd9c65755b8a91df18e",
+    csrfToken: req.csrfToken(),
     scripts: `<script src="/js/custom/auth/new-password.js"></script>`,
   });
 };
@@ -54,6 +58,7 @@ exports.getTwoFactor = (req, res) => {
     layout: "layouts/auth-layout-no-index",
     title: "Two Factor",
     wfPage: "66b93fd9c65755b8a91df18e",
+    csrfToken: req.csrfToken(),
     scripts: `<script src="/js/custom/auth/two-factor.js"></script>`,
   });
 };
@@ -196,7 +201,7 @@ exports.postRequestPasswordReset = async (req, res, next) => {
     });
   } catch (err) {
     return res.status(400).json({
-      syccess: false,
+      success: false,
       message: err.message || "Could not process request",
     });
   }
@@ -351,8 +356,11 @@ exports.postLogout = (req, res) => {
       res.clearCookie("connect.sid", { path: "/" });
       res.clearCookie("jwt", { path: "/" });
 
+      // Check user role
+      const role = req.user && req.user.role;
+
       // Return JSON, NOT redirect
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ success: true, role: role });
     });
   });
 };
