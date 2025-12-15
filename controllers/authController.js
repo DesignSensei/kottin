@@ -13,7 +13,8 @@ exports.getLogin = (req, res) => {
     title: "Log In",
     wfPage: "66b93fd9c65755b8a91df18e",
     csrfToken: req.csrfToken(),
-    scripts: `<script src="/js/custom/auth/login.js"></script>`,
+    scripts: `<script src="/js/custom/auth/login.js"></script>
+    <script src="/js/custom/auth/carousel.js"></script>`,
   });
 };
 
@@ -24,7 +25,8 @@ exports.getSignup = (req, res) => {
     title: "Sign Up",
     wfPage: "66b93fd9c65755b8a91df18e",
     csrfToken: req.csrfToken(),
-    scripts: `<script type="module" src="/js/custom/auth/signup.js"></script>`,
+    scripts: `<script type="module" src="/js/custom/auth/signup.js"></script>
+    <script src="/js/custom/auth/carousel.js"></script>`,
   });
 };
 
@@ -35,7 +37,8 @@ exports.getResetPassword = (req, res) => {
     title: "Reset Password",
     wfPage: "66b93fd9c65755b8a91df18e",
     csrfToken: req.csrfToken(),
-    scripts: `<script src="/js/custom/auth/reset-password.js"></script>`,
+    scripts: `<script src="/js/custom/auth/reset-password.js"></script>
+    <script src="/js/custom/auth/carousel.js"></script>`,
   });
 };
 
@@ -46,7 +49,8 @@ exports.getNewPassword = (req, res) => {
     title: "New Password",
     wfPage: "66b93fd9c65755b8a91df18e",
     csrfToken: req.csrfToken(),
-    scripts: `<script src="/js/custom/auth/new-password.js"></script>`,
+    scripts: `<script src="/js/custom/auth/new-password.js"></script>
+    <script src="/js/custom/auth/carousel.js"></script>`,
   });
 };
 
@@ -59,7 +63,8 @@ exports.getTwoFactor = (req, res) => {
     title: "Two Factor",
     wfPage: "66b93fd9c65755b8a91df18e",
     csrfToken: req.csrfToken(),
-    scripts: `<script src="/js/custom/auth/two-factor.js"></script>`,
+    scripts: `<script src="/js/custom/auth/two-factor.js"></script>
+    <script src="/js/custom/auth/carousel.js"></script>`,
   });
 };
 
