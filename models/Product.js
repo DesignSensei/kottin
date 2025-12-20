@@ -2,7 +2,7 @@
 
 const mongoose = require("mongoose");
 
-// Tiny slugger funvtion
+// Tiny slugger function
 function slugify(s) {
   return String(s)
     .trim()
@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true, // ← ADDED
     },
 
     slug: {
@@ -36,9 +37,41 @@ const productSchema = new mongoose.Schema(
       default: "",
     },
 
-    quantity: {
+    stock: {
       type: Number,
       required: true,
+      default: 0,
+    },
+
+    sizes: {
+      type: [String],
+      enum: ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"],
+      default: [],
+    },
+
+    colors: {
+      type: [String],
+      default: [],
+    },
+
+    fabric: {
+      type: String,
+      default: "",
+    },
+
+    careInstructions: {
+      type: [String],
+      default: [],
+    },
+
+    gender: {
+      type: String,
+      enum: ["Unisex", "Men", "Women"],
+      default: "Unisex",
+    },
+
+    weight: {
+      type: Number,
       default: 0,
     },
 
@@ -68,16 +101,6 @@ const productSchema = new mongoose.Schema(
       default: [],
     },
 
-    // Optional toy-specific specs
-    specs: {
-      material: String,
-      dimensions: {
-        length: Number,
-        diameter: Number,
-      },
-      vibrationModes: [String], // e.g. ['pulse','wave']
-    },
-
     active: {
       type: Boolean,
       default: true,
@@ -102,5 +125,8 @@ productSchema.index(
 
 // Helpful read index (common pattern you'll query)
 productSchema.index({ active: 1, createdAt: -1 });
+
+// Index for filtering by category and gender
+productSchema.index({ categories: 1, gender: 1 });
 
 module.exports = mongoose.model("Product", productSchema);

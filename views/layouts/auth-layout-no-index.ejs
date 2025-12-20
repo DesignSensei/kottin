@@ -74,25 +74,79 @@
           <div class="inner-container _1312px center">
             <div class="w-layout-grid grid-2-columns _404-grid-2-col">
               <%- body %>
+
+              <!-- Auth Image Carousel -->
               <div
                 data-w-id="54664585-c52a-0b82-f98d-28a06e375587"
                 class="inner-container _592px _100-tablet"
               >
-                <div class="image-wrapper border-radius-16px">
-                  <img
-                    src="/assets/images/auth-image-2368w.png"
-                    loading="eager"
-                    sizes="(max-width: 991px) 100vw, (max-width: 1439px) 53vw, 590.1875px"
-                    srcset="
-                      /assets/images/auth-image-500w.png   500w,
-                      /assets/images/auth-image-800w.png   800w,
-                      /assets/images/auth-image-1080w.png 1080w,
-                      /assets/images/auth-image-1600w.png 1600w,
-                      /assets/images/auth-image-2368w.png 2368w
-                    "
-                    alt="Seamless pattern of various pink adult toys and accessories on a light pink background, with repeated '18+' symbols"
-                    class="_w-h-100 fit-cover"
-                  />
+                <div class="carousel-wrapper">
+                  <div class="carousel-track" id="carouselTrack">
+                    <!-- Slide 1 -->
+                    <div class="carousel-slide">
+                      <img
+                        src="/assets/images/image1-2368w.png"
+                        loading="eager"
+                        sizes="(max-width: 991px) 100vw, (max-width: 1439px) 53vw, 590.1875px"
+                        srcset="
+                          /assets/images/image1-500w.png   500w,
+                          /assets/images/image1-800w.png   800w,
+                          /assets/images/image1-1080w.png 1080w,
+                          /assets/images/image1-1600w.png 1600w,
+                          /assets/images/image1-2368w.png 2368w
+                        "
+                        alt="Minimalist clothing brand Kottin - sustainable everyday wear"
+                        class="_w-h-100 fit-cover"
+                      />
+                    </div>
+
+                    <!-- Slide 2 -->
+                    <div class="carousel-slide">
+                      <img
+                        src="/assets/images/image2-2368w.png"
+                        loading="eager"
+                        sizes="(max-width: 991px) 100vw, (max-width: 1439px) 53vw, 590.1875px"
+                        srcset="
+                          /assets/images/image2-500w.png   500w,
+                          /assets/images/image2-800w.png   800w,
+                          /assets/images/image2-1080w.png 1080w,
+                          /assets/images/image2-1600w.png 1600w,
+                          /assets/images/image2-2368w.png 2368w
+                        "
+                        alt="High-quality neutral apparel by Kottin"
+                        class="_w-h-100 fit-cover"
+                      />
+                    </div>
+
+                    <!-- Slide 3 -->
+                    <div class="carousel-slide">
+                      <img
+                        src="/assets/images/image3-2368w.png"
+                        loading="eager"
+                        sizes="(max-width: 991px) 100vw, (max-width: 1439px) 53vw, 590.1875px"
+                        srcset="
+                          /assets/images/image3-500w.png   500w,
+                          /assets/images/image3-800w.png   800w,
+                          /assets/images/image3-1080w.png 1080w,
+                          /assets/images/image3-1600w.png 1600w,
+                          /assets/images/image3-2368w.png 2368w
+                        "
+                        alt="Timeless minimalist fashion - Kottin essential pieces"
+                        class="_w-h-100 fit-cover"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Navigation Arrows -->
+                  <button class="carousel-arrow prev" id="prevBtn" aria-label="Previous slide">
+                    ‹
+                  </button>
+                  <button class="carousel-arrow next" id="nextBtn" aria-label="Next slide">
+                    ›
+                  </button>
+
+                  <!-- Dot Navigation -->
+                  <div class="carousel-dots" id="carouselDots"></div>
                 </div>
               </div>
             </div>

@@ -1,36 +1,93 @@
 <!--views/partials/auth-navbar.ejs-->
-
 <nav role="navigation" class="nav-menu-wrapper w-nav-menu">
   <ul role="list" class="list-nav-menu">
-    <!-- Primary Links -->
+    <!-- Shop -->
     <li class="link-nav-item">
-      <a href="/home-pages/home-v1" class="header-nav-link w-nav-link">Home</a>
+      <a href="/shop/all" class="header-nav-link w-nav-link">Shop</a>
     </li>
+
+    <!-- Categories Dropdown -->
     <li class="link-nav-item">
-      <a href="/company-pages/about" class="header-nav-link w-nav-link"
-        >Pleasures</a
+      <div
+        data-hover="true"
+        data-delay="0"
+        data-w-id="c5a10a2d-1ce6-df65-3882-e8a1991bf29d"
+        class="dropdown-wrapper dropdown-default w-dropdown"
       >
+        <div
+          class="dropdown-toogle w-dropdown-toggle"
+          id="w-dropdown-toggle-categories"
+          aria-controls="w-dropdown-list-categories"
+          aria-haspopup="menu"
+          aria-expanded="false"
+          role="button"
+          tabindex="0"
+        >
+          <div>Categories</div>
+          <div
+            class="icon-font-rounded dropdown-arrow"
+            style="
+              transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg)
+                rotateZ(0deg) skew(0deg, 0deg);
+              transform-style: preserve-3d;
+            "
+          >
+            
+          </div>
+        </div>
+
+        <nav
+          class="dropdown-list dropdown-v1 w-dropdown-list"
+          id="w-dropdown-list-categories"
+          aria-labelledby="w-dropdown-toggle-categories"
+        >
+          <div class="card dropdown-pd">
+            <div class="menu-wrapper">
+              <div>
+                <div class="nav-content">
+                  <ul role="list" class="nav-menu-list-wrapper">
+                    <!-- No section titles, badges do the work -->
+                    <li class="nav-menu-list-item">
+                      <a href="/shop/category/basics" class="nav-link">Basics</a>
+                    </li>
+                    <li class="nav-menu-list-item">
+                      <a href="/shop/category/graphic-wear" class="nav-link">Graphic Wear</a>
+                    </li>
+                    <li class="nav-menu-list-item">
+                      <a href="/shop/category/accessories" class="nav-link">Accessories</a>
+                    </li>
+                    <li class="nav-menu-list-item">
+                      <a href="/coming-soon?category=performance" class="nav-link">
+                        Performance
+                        <span class="coming-soon-badge">Soon</span>
+                      </a>
+                    </li>
+                    <li class="nav-menu-list-item last">
+                      <a href="/coming-soon?category=fabrics" class="nav-link">
+                        Fabrics & Materials
+                        <span class="coming-soon-badge">Soon</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
     </li>
+
+    <!-- About -->
     <li class="link-nav-item">
-      <a href="/company-pages/contact" class="header-nav-link w-nav-link"
-        >Deals</a
-      >
+      <a href="/about" class="header-nav-link w-nav-link">About</a>
     </li>
-    <li class="link-nav-item">
-      <a href="/blog-pages/blog-v1" class="header-nav-link w-nav-link"
-        >Diaries</a
-      >
-    </li>
+
+    <!-- Mobile CTA -->
 
     <li class="link-nav-item show-on-mobile">
-      <a
-        id="w-node-e9da5fd6-ab44-5b2f-81ad-6e5f36bfab9c-36bfab9c"
-        href="/shop-pages/all-products-v1"
-        class="primary-button-2 w-inline-block-2"
-        ><div>Shop now</div></a
-      >
+      <a href="/shop/all" class="primary-button-2 w-inline-block-2">
+        <div>Shop Now</div>
+      </a>
     </li>
-
-    <li></li>
   </ul>
 </nav>
